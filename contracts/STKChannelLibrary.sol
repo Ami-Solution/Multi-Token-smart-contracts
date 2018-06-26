@@ -60,6 +60,7 @@ library STKChannelLibrary
     function close(
         STKChannelData storage data,
         address _channelAddress,
+        address _addressOfToken,
         uint _nonce,
         uint _amount,
         uint8 _v,
@@ -70,7 +71,7 @@ library STKChannelLibrary
         callerIsChannelParticipant(data)
     {
         require(_amount <= data.token_.balanceOf(_channelAddress));
-        address signerAddress = recoverAddressFromHashAndParameters(_nonce,_amount,_r,_s,_v);
+        address signerAddress = recoverAddressFromHashAndParameters(_addressOfToken, _nonce,_amount,_r,_s,_v);
         require((signerAddress == data.signerAddress_ && data.recipientAddress_  == msg.sender) || (signerAddress == data.recipientAddress_  && data.signerAddress_==msg.sender));
         require(signerAddress!=msg.sender);
         data.amountOwed_ = _amount;
@@ -104,6 +105,7 @@ library STKChannelLibrary
     function updateClosedChannel(
         STKChannelData storage data,
         address _channelAddress,
+        address _addressOfToken,
         uint _nonce,
         uint _amount,
         uint8 _v,
@@ -114,7 +116,7 @@ library STKChannelLibrary
         channelAlreadyClosed(data)
     {
         require(data.token_.balanceOf(_channelAddress) >= _amount);
-        address signerAddress = recoverAddressFromHashAndParameters(_nonce,_amount,_r,_s,_v);
+        address signerAddress = recoverAddressFromHashAndParameters(_addressOfToken, _nonce,_amount,_r,_s,_v);
         require(signerAddress == data.signerAddress_);
         //require that the nonce of this transaction be higher than the previous closing nonce
         require(_nonce > data.closedNonce_);
@@ -164,12 +166,12 @@ library STKChannelLibrary
     * @param s Cryptographic param r derived from the signature.
     * @param v Cryptographic param s derived from the signature.
     */
-    function recoverAddressFromHashAndParameters(uint _nonce,uint _amount,bytes32 r,bytes32 s,uint8 v)
+    function recoverAddressFromHashAndParameters(address _addressOfToken, uint _nonce,uint _amount,bytes32 r,bytes32 s,uint8 v)
         internal view
         returns (address)
     {
         bytes memory prefix = "\x19Ethereum Signed Message:\n32";
-        bytes32 msgHash = keccak256(this,_nonce,_amount);
+        bytes32 msgHash = keccak256(this, _addressOfToken, _nonce,_amount);
         bytes32 prefixedHash = keccak256(prefix, msgHash);
         return ecrecover(prefixedHash, v, r, s);
     }
