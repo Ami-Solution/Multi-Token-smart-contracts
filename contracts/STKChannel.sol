@@ -47,6 +47,7 @@ contract STKChannel
         channel.token_ = STKToken(_addressOfToken);
         channel.openedBlock_ = block.number;
 
+        emit LogChannelOpened(channel.userAddress_, channel.recipientAddress_, channel.openedBlock_);
     }
 
     /**
