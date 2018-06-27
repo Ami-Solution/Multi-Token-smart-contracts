@@ -17,7 +17,7 @@ contract STKChannel
      */
 
     mapping (address => STKChannelLibrary.STKChannelData) channels;
-
+    address recipientAddress = msg.sender;
     event LogChannelOpened(address from, address to, uint blockNumber);
     event LogChannelClosed(uint blockNumber, address closer, uint amount);
     event LogDeposited(address depositingAddress, uint amount);
@@ -115,15 +115,14 @@ contract STKChannel
         channel.settle(address(this), _returnToken);
     }
 
-    function setChannel(address _addressOfToken, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks) external
+    function addChannel(address _addressOfToken, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
+        external
     {
+        require(recipientAddress == msg.sender);
         var channel = channels[_addressOfToken];
+        require(channel.timeout_ <= uint(1));
         channel.token_ = STKToken(_addressOfToken);
-        channel.userAddress_ = _from;
-        channel.signerAddress_ = _addressOfSigner;
-        channel.recipientAddress_ = msg.sender;
-        channel.timeout_ = _expiryNumberOfBlocks;
-        channel.openedBlock_ = block.number;
+        channel.addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
     }
 
     function getChannelData(address _addressOfToken) view public returns (address, address, address, address, uint, uint, uint, uint, uint) {

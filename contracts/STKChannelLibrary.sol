@@ -159,6 +159,20 @@ library STKChannelLibrary
     }
 
     /**
+    * @notice Add new token
+    * @param data The channel specific data to work on.
+    */
+    function addChannel(STKChannelData storage data, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
+        public
+    {
+        data.userAddress_ = _from;
+        data.signerAddress_ = _addressOfSigner;
+        data.recipientAddress_ = msg.sender;
+        data.timeout_ = _expiryNumberOfBlocks;
+        data.openedBlock_ = block.number;
+    }
+
+    /**
     * @notice After the timeout of the channel after closing has passed, can be called by either participant to withdraw funds.
     * @param _nonce The nonce of the deposit. Used for avoiding replay attacks.
     * @param _amount The amount of tokens claimed to be due to the receiver.
