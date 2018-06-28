@@ -15,8 +15,9 @@ contract STKChannel
     /**
      * Storage variables
      */
-    STKChannelLibrary.STKChannelData public channelData_;
 
+    mapping (address => STKChannelLibrary.STKChannelData) channels;
+    address recipientAddress = msg.sender;
     event LogChannelOpened(address from, address to, uint blockNumber);
     event LogChannelClosed(uint blockNumber, address closer, uint amount);
     event LogDeposited(address depositingAddress, uint amount);
@@ -37,14 +38,14 @@ contract STKChannel
         public
     {
 
-        channelData_.userAddress_ = _from;
-        channelData_.signerAddress_ = _addressOfSigner;
-        channelData_.recipientAddress_ = msg.sender;
-        channelData_.timeout_ = _expiryNumberOfBlocks;
-        channelData_.token_ = STKToken(_addressOfToken);
-        channelData_.openedBlock_ = block.number;
+        channels[_addressOfToken].token_ = STKToken(_addressOfToken);
+        channels[_addressOfToken].userAddress_ = _from;
+        channels[_addressOfToken].signerAddress_ = _addressOfSigner;
+        channels[_addressOfToken].recipientAddress_ = msg.sender;
+        channels[_addressOfToken].timeout_ = _expiryNumberOfBlocks;
+        channels[_addressOfToken].openedBlock_ = block.number;
 
-        emit LogChannelOpened(channelData_.userAddress_, channelData_.recipientAddress_, channelData_.openedBlock_);
+        emit LogChannelOpened(channels[_addressOfToken].userAddress_, channels[_addressOfToken].recipientAddress_, channels[_addressOfToken].openedBlock_);
     }
 
     /**
@@ -56,6 +57,7 @@ contract STKChannel
     * @param _s Cryptographic param s derived from the signature.
     */
     function close(
+        address _addressOfToken,
         uint _nonce,
         uint _amount,
         uint8 _v,
@@ -63,18 +65,21 @@ contract STKChannel
         bytes32 _s)
         external
     {
-        channelData_.close(address(this), _nonce, _amount, _v,_r,_s);
+        require(channels[_addressOfToken].timeout_ <= uint(1));
+        channels[_addressOfToken].close(address(this), _addressOfToken, _nonce, _amount, _v,_r,_s);
         emit LogChannelClosed(block.number, msg.sender, _amount);
     }
 
     /**
     * @notice Function to close the payment channel without a signature.
     */
-    function closeWithoutSignature()
+    function closeWithoutSignature(
+        address _addressOfToken)
         external
     {
-        channelData_.closeWithoutSignature();
-        emit LogChannelClosed(block.number, msg.sender, channelData_.amountOwed_);
+        require(channels[_addressOfToken].timeout_ <= uint(1));
+        channels[_addressOfToken].closeWithoutSignature();
+        emit LogChannelClosed(block.number, msg.sender, channels[_addressOfToken].amountOwed_);
     }
 
     /**
@@ -86,6 +91,7 @@ contract STKChannel
     * @param _s Cryptographic param s derived from the signature.
     */
     function updateClosedChannel(
+        address _addressOfToken,
         uint _nonce,
         uint _amount,
         uint8 _v,
@@ -93,16 +99,40 @@ contract STKChannel
         bytes32 _s)
         external
     {
-        channelData_.updateClosedChannel(address(this), _nonce, _amount, _v, _r, _s);
+        require(channels[_addressOfToken].timeout_ <= uint(1));
+        channels[_addressOfToken].updateClosedChannel(address(this), _addressOfToken, _nonce, _amount, _v, _r, _s);
         emit LogChannelContested(_amount, msg.sender);
     }
 
     /**
     * @notice After the timeout of the channel after closing has passed, can be called by either participant to withdraw funds.
     */
-    function settle(bool _returnToken)
+    function settle( address _addressOfToken, bool _returnToken)
         external
     {
-        channelData_.settle(address(this), _returnToken);
+        require(channels[_addressOfToken].timeout_ <= uint(1));
+        channels[_addressOfToken].settle(address(this), _returnToken);
+    }
+
+    function addChannel(address _addressOfToken, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
+        external
+    {
+        require(recipientAddress == msg.sender);
+        require(channels[_addressOfToken].timeout_ <= uint(1));
+        channels[_addressOfToken].token_ = STKToken(_addressOfToken);
+        channels[_addressOfToken].addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
+    }
+
+    function getChannelData(address _addressOfToken) view public returns (address, address, address, address, uint, uint, uint, uint, uint) {
+        var channel = channels[_addressOfToken];
+        return (channel.userAddress_,
+                channel.signerAddress_,
+                channel.recipientAddress_,
+                channel.closingAddress_,
+                channel.timeout_,
+                channel.amountOwed_,
+                channel.openedBlock_,
+                channel.closedBlock_,
+                channel.closedNonce_);
     }
 }
