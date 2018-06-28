@@ -43,9 +43,8 @@ contract STKChannel
         channels[_addressOfToken].signerAddress_ = _addressOfSigner;
         channels[_addressOfToken].recipientAddress_ = msg.sender;
         channels[_addressOfToken].timeout_ = _expiryNumberOfBlocks;
-        channels[_addressOfToken].openedBlock_ = block.number;
 
-        emit LogChannelOpened(channels[_addressOfToken].userAddress_, channels[_addressOfToken].recipientAddress_, channels[_addressOfToken].openedBlock_);
+        emit LogChannelOpened(channels[_addressOfToken].userAddress_, channels[_addressOfToken].recipientAddress_, block.number);
     }
 
     /**
@@ -123,16 +122,15 @@ contract STKChannel
         channels[_addressOfToken].addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
     }
 
-    function getChannelData(address _addressOfToken) view public returns (address, address, address, address, uint, uint, uint, uint, uint) {
+    function getChannelData(address _addressOfToken) view public returns (address, address, address, uint, uint, uint, uint, uint) {
         var channel = channels[_addressOfToken];
         return (channel.userAddress_,
-                channel.signerAddress_,
-                channel.recipientAddress_,
-                channel.closingAddress_,
-                channel.timeout_,
-                channel.amountOwed_,
-                channel.openedBlock_,
-                channel.closedBlock_,
-                channel.closedNonce_);
+        channel.signerAddress_,
+        channel.recipientAddress_,
+        channel.timeout_,
+        channel.amountOwed_,
+        block.number,
+        channel.closedBlock_,
+        channel.closedNonce_);
     }
 }

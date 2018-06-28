@@ -14,7 +14,7 @@ Machine-based, rapid creation of many tokens would not necessarily need these ex
 pragma solidity ^0.4.23;
 import "./StandardToken.sol";
 
-contract STKToken is StandardToken {
+contract ERC20Token is StandardToken {
     /* Public variables of the token */
     string public name;
     uint8 public decimals;                //How many decimals to show. ie. There could 1000 base units with 3 decimals. Meaning 0.980 SBX = 980 base units. It's like comparing 1 wei to 1 ether.

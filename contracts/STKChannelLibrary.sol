@@ -1,6 +1,6 @@
 pragma solidity ^0.4.23;
 
-import "./STKToken.sol";
+import "./ERC20Token.sol";
 import "./SafeMathLib.sol";
 
 library STKChannelLibrary
@@ -8,16 +8,15 @@ library STKChannelLibrary
     using SafeMathLib for uint;
 
     struct STKChannelData
-    {    STKToken token_;
-         address userAddress_;
-         address signerAddress_;
-         address recipientAddress_;
-         address closingAddress_;
-         uint timeout_;
-         uint amountOwed_;
-         uint openedBlock_;
-         uint closedBlock_;
-         uint closedNonce_;
+    {
+        ERC20Token token_;
+        address userAddress_;
+        address signerAddress_;
+        address recipientAddress_;
+        uint timeout_;
+        uint amountOwed_;
+        uint closedBlock_;
+        uint closedNonce_;
     }
 
     event LogChannelSettled(uint blockNumber, uint finalBalance);
@@ -38,7 +37,6 @@ library STKChannelLibrary
     modifier channelIsOpen(STKChannelData storage data)
     {
         require(data.closedBlock_ == 0);
-        require(data.openedBlock_ > 0);
         _;
     }
 
@@ -77,7 +75,6 @@ library STKChannelLibrary
         data.amountOwed_ = _amount;
         data.closedNonce_ = _nonce;
         data.closedBlock_ = block.number;
-        data.closingAddress_ = msg.sender;
     }
 
     /**
@@ -90,7 +87,6 @@ library STKChannelLibrary
         callerIsChannelParticipant(data)
       {
         data.closedBlock_ = block.number;
-        data.closingAddress_ = msg.sender;
       }
 
     /**
@@ -135,13 +131,11 @@ library STKChannelLibrary
         timeoutOver(data)
         callerIsChannelParticipant(data)
     {
-        require(data.token_.balanceOf(_channelAddress)>= data.amountOwed_);
+        require(data.token_.balanceOf(_channelAddress)>=data.amountOwed_);
         uint returnToUserAmount = data.token_.balanceOf(_channelAddress).minus(data.amountOwed_);
         uint owedAmount = data.amountOwed_;
         data.amountOwed_ = 0;
 
-        data.closingAddress_ = 0x0000000000000000000000000000000000000000;
-        data.openedBlock_ = block.number;
         data.closedBlock_ = 0;
         data.closedNonce_ = 0;
 
@@ -169,7 +163,6 @@ library STKChannelLibrary
         data.signerAddress_ = _addressOfSigner;
         data.recipientAddress_ = msg.sender;
         data.timeout_ = _expiryNumberOfBlocks;
-        data.openedBlock_ = block.number;
     }
 
     /**
