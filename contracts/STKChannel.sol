@@ -38,7 +38,7 @@ contract STKChannel
         public
     {
 
-        channels[_addressOfToken].token_ = STKToken(_addressOfToken);
+        channels[_addressOfToken].token_ = ERC20Token(_addressOfToken);
         channels[_addressOfToken].userAddress_ = _from;
         channels[_addressOfToken].signerAddress_ = _addressOfSigner;
         channels[_addressOfToken].recipientAddress_ = msg.sender;
@@ -118,7 +118,7 @@ contract STKChannel
     {
         require(recipientAddress == msg.sender);
         require(channels[_addressOfToken].timeout_ <= uint(1));
-        channels[_addressOfToken].token_ = STKToken(_addressOfToken);
+        channels[_addressOfToken].token_ = ERC20Token(_addressOfToken);
         channels[_addressOfToken].addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
     }
 
