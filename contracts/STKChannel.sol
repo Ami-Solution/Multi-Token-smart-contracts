@@ -38,15 +38,14 @@ contract STKChannel
         public
     {
 
-        var channel = channels[_addressOfToken];
-        channel.token_ = STKToken(_addressOfToken);
-        channel.userAddress_ = _from;
-        channel.signerAddress_ = _addressOfSigner;
-        channel.recipientAddress_ = msg.sender;
-        channel.timeout_ = _expiryNumberOfBlocks;
-        channel.openedBlock_ = block.number;
+        channels[_addressOfToken].token_ = STKToken(_addressOfToken);
+        channels[_addressOfToken].userAddress_ = _from;
+        channels[_addressOfToken].signerAddress_ = _addressOfSigner;
+        channels[_addressOfToken].recipientAddress_ = msg.sender;
+        channels[_addressOfToken].timeout_ = _expiryNumberOfBlocks;
+        channels[_addressOfToken].openedBlock_ = block.number;
 
-        emit LogChannelOpened(channel.userAddress_, channel.recipientAddress_, channel.openedBlock_);
+        emit LogChannelOpened(channels[_addressOfToken].userAddress_, channels[_addressOfToken].recipientAddress_, channels[_addressOfToken].openedBlock_);
     }
 
     /**
@@ -66,8 +65,8 @@ contract STKChannel
         bytes32 _s)
         external
     {
-        var channel = channels[_addressOfToken];
-        channel.close(address(this), _addressOfToken, _nonce, _amount, _v,_r,_s);
+        require(channels[_addressOfToken].timeout_ <= uint(1));
+        channels[_addressOfToken].close(address(this), _addressOfToken, _nonce, _amount, _v,_r,_s);
         emit LogChannelClosed(block.number, msg.sender, _amount);
     }
 
@@ -78,9 +77,9 @@ contract STKChannel
         address _addressOfToken)
         external
     {
-        var channel = channels[_addressOfToken];
-        channel.closeWithoutSignature();
-        emit LogChannelClosed(block.number, msg.sender, channel.amountOwed_);
+        require(channels[_addressOfToken].timeout_ <= uint(1));
+        channels[_addressOfToken].closeWithoutSignature();
+        emit LogChannelClosed(block.number, msg.sender, channels[_addressOfToken].amountOwed_);
     }
 
     /**
@@ -100,8 +99,8 @@ contract STKChannel
         bytes32 _s)
         external
     {
-        var channel = channels[_addressOfToken];
-        channel.updateClosedChannel(address(this), _addressOfToken, _nonce, _amount, _v, _r, _s);
+        require(channels[_addressOfToken].timeout_ <= uint(1));
+        channels[_addressOfToken].updateClosedChannel(address(this), _addressOfToken, _nonce, _amount, _v, _r, _s);
         emit LogChannelContested(_amount, msg.sender);
     }
 
@@ -111,18 +110,17 @@ contract STKChannel
     function settle( address _addressOfToken, bool _returnToken)
         external
     {
-        var channel = channels[_addressOfToken];
-        channel.settle(address(this), _returnToken);
+        require(channels[_addressOfToken].timeout_ <= uint(1));
+        channels[_addressOfToken].settle(address(this), _returnToken);
     }
 
     function addChannel(address _addressOfToken, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
         external
     {
         require(recipientAddress == msg.sender);
-        var channel = channels[_addressOfToken];
-        require(channel.timeout_ <= uint(1));
-        channel.token_ = STKToken(_addressOfToken);
-        channel.addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
+        require(channels[_addressOfToken].timeout_ <= uint(1));
+        channels[_addressOfToken].token_ = STKToken(_addressOfToken);
+        channels[_addressOfToken].addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
     }
 
     function getChannelData(address _addressOfToken) view public returns (address, address, address, address, uint, uint, uint, uint, uint) {
