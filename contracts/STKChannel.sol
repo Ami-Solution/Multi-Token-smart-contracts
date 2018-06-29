@@ -64,7 +64,7 @@ contract STKChannel
         bytes32 _s)
         external
     {
-        require(channels[_addressOfToken].timeout_ <= uint(1));
+        require(channels[_addressOfToken].timeout_ > uint(1));
         channels[_addressOfToken].close(address(this), _addressOfToken, _nonce, _amount, _v,_r,_s);
         emit LogChannelClosed(block.number, msg.sender, _amount);
     }
@@ -76,7 +76,7 @@ contract STKChannel
         address _addressOfToken)
         external
     {
-        require(channels[_addressOfToken].timeout_ <= uint(1));
+        require(channels[_addressOfToken].timeout_ > uint(1));
         channels[_addressOfToken].closeWithoutSignature();
         emit LogChannelClosed(block.number, msg.sender, channels[_addressOfToken].amountOwed_);
     }
@@ -98,7 +98,7 @@ contract STKChannel
         bytes32 _s)
         external
     {
-        require(channels[_addressOfToken].timeout_ <= uint(1));
+        require(channels[_addressOfToken].timeout_ > uint(1));
         channels[_addressOfToken].updateClosedChannel(address(this), _addressOfToken, _nonce, _amount, _v, _r, _s);
         emit LogChannelContested(_amount, msg.sender);
     }
@@ -109,7 +109,7 @@ contract STKChannel
     function settle( address _addressOfToken, bool _returnToken)
         external
     {
-        require(channels[_addressOfToken].timeout_ <= uint(1));
+        require(channels[_addressOfToken].timeout_ > uint(1));
         channels[_addressOfToken].settle(address(this), _returnToken);
     }
 
