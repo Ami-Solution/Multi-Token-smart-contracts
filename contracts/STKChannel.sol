@@ -12,6 +12,18 @@ contract STKChannel
 {
     using STKChannelLibrary for STKChannelLibrary.STKChannelData;
 
+    modifier channelExists(address addressOfToken) 
+    { 
+        require(channels[addressOfToken].timeout_ > uint(0));
+        _;
+    }
+
+    modifier channelDoesNotExist(address addressOfToken) 
+    { 
+        require(channels[addressOfToken].timeout_ <= uint(0));
+        _; 
+    }
+
     /**
      * Storage variables
      */
@@ -37,7 +49,6 @@ contract STKChannel
         uint _expiryNumberOfBlocks)
         public
     {
-
         channels[_addressOfToken].token_ = ERC20Token(_addressOfToken);
         channels[_addressOfToken].userAddress_ = _from;
         channels[_addressOfToken].signerAddress_ = _addressOfSigner;
@@ -63,8 +74,8 @@ contract STKChannel
         bytes32 _r,
         bytes32 _s)
         external
+        channelExists(_addressOfToken)
     {
-        require(channels[_addressOfToken].timeout_ > uint(1));
         channels[_addressOfToken].close(address(this), _addressOfToken, _nonce, _amount, _v,_r,_s);
         emit LogChannelClosed(block.number, msg.sender, _amount);
     }
@@ -75,8 +86,8 @@ contract STKChannel
     function closeWithoutSignature(
         address _addressOfToken)
         external
+        channelExists(_addressOfToken)
     {
-        require(channels[_addressOfToken].timeout_ > uint(1));
         channels[_addressOfToken].closeWithoutSignature();
         emit LogChannelClosed(block.number, msg.sender, channels[_addressOfToken].amountOwed_);
     }
@@ -97,8 +108,8 @@ contract STKChannel
         bytes32 _r,
         bytes32 _s)
         external
+        channelExists(_addressOfToken)
     {
-        require(channels[_addressOfToken].timeout_ > uint(1));
         channels[_addressOfToken].updateClosedChannel(address(this), _addressOfToken, _nonce, _amount, _v, _r, _s);
         emit LogChannelContested(_amount, msg.sender);
     }
@@ -108,16 +119,16 @@ contract STKChannel
     */
     function settle( address _addressOfToken, bool _returnToken)
         external
+        channelExists(_addressOfToken)        
     {
-        require(channels[_addressOfToken].timeout_ > uint(1));
         channels[_addressOfToken].settle(address(this), _returnToken);
     }
 
     function addChannel(address _addressOfToken, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
         external
+        channelDoesNotExist(_addressOfToken)
     {
         require(recipientAddress == msg.sender);
-        require(channels[_addressOfToken].timeout_ <= uint(1));
         channels[_addressOfToken].token_ = ERC20Token(_addressOfToken);
         channels[_addressOfToken].addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
     }
