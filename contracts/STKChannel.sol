@@ -1,7 +1,7 @@
 pragma solidity ^0.4.23;
 
 
-import "./STKChannelLibrary.sol";
+import "./STKLibrary.sol";
 
 
 /**
@@ -10,7 +10,7 @@ Once closed, there is a contest period which allows state updates.
 */
 contract STKChannel
 {
-    using STKChannelLibrary for STKChannelLibrary.STKChannelData;
+    using STKLibrary for STKLibrary.STKChannelData;
 
     modifier channelExists(address addressOfToken) 
     { 
@@ -28,7 +28,7 @@ contract STKChannel
      * Storage variables
      */
 
-    mapping (address => STKChannelLibrary.STKChannelData) channels;
+    mapping (address => STKLibrary.STKChannelData) channels;
     address recipientAddress = msg.sender;
     event LogChannelOpened(address from, address to, uint blockNumber);
     event LogChannelClosed(uint blockNumber, address closer, uint amount);
