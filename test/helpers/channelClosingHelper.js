@@ -2,9 +2,9 @@ const web3Utils = require('web3-utils')
 var ethUtil = require('ethereumjs-util');
 const prefix = new Buffer("\x19Ethereum Signed Message:\n");
 module.exports = {
-  "getClosingParameters": function(nonce,amount,channelAddress,signersPk)
+  "getClosingParameters": function(tokenAddress,nonce,amount,channelAddress,signersPk)
     {
-      const hash = web3Utils.soliditySha3(channelAddress,nonce,amount);
+      const hash = web3Utils.soliditySha3(channelAddress,tokenAddress,nonce,amount);
       const hashBuffer = ethUtil.toBuffer(hash);
       const prefixedHash = addPrefix(hashBuffer);
       const signature = ethUtil.ecsign(prefixedHash, signersPk);

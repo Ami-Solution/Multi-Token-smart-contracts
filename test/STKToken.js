@@ -13,51 +13,72 @@ contract("Testing ERC20 Token", function () {
     const timeout = 10;
     const initialCreation = 1000000000; 
 
+    config({
+        deployment: {
+            "host": "localhost",
+            "port": 8545,
+            "type": "rpc"
+        }
+    });
+
     before(function(done) {
         web3.eth.getAccounts(function (err, accounts) {
             if (err) {
                 return done(err);
             }
-            allAccounts = accounts;
-
             config({
-                contracts: {
-                    "Token": {
+                "deployment": {
+                    "host": "localhost",
+                    "port": 8555,
+                    "type": "rpc",
+                    "accounts": [
+                        // {
+                        //     "privateKeyFile": "test/helpers/privateKeys.js" // You can put more than one key, separated by , or ;
+                        // },
+                        // {
+                        //     "mnemonic": "example exile argue silk regular smile grass bomb merge arm assist farm",
+                        //     "addressIndex": "0", // Optional. The index to start getting the address
+                        //     "numAddresses": "10", // Optional. The number of addresses to get
+                        // }
+                    ]},
+                    contracts: {
+                        "Token": {
 
-                    },
-                    "StandardToken": {
+                        },
+                        "StandardToken": {
 
-                    },
-                    "ERC20Token": {
-                        args: [initialCreation,'STK', 18, 'STK'],
-                        "fromIndex":3
-                    },
-                    STKLibrary: {
-                        args: [
-                            '$ERC20Token',
-                            accounts[0],
-                            accounts[2],
-                            accounts[1],
-                            timeout,
-                            1,
-                            0,
-                            0
-                        ],
-                        "fromIndex":1
-                    },
-                    "STKChannel": {
-                        args: [
-                            accounts[0],
-                            accounts[2],
-                            '$ERC20Token',
-                            timeout
-                        ],
-                        "fromIndex":1
+                        },
+                        "ERC20Token": {
+                            args: [initialCreation,'STK', 18, 'STK'],
+                            "fromIndex":3
+                        },
+                        STKLibrary: {
+                            args: [
+                                '$ERC20Token',
+                                accounts[0],
+                                accounts[2],
+                                accounts[1],
+                                timeout,
+                                1,
+                                0,
+                                0
+                            ],
+                            "fromIndex":1
+                        },
+                        "STKChannel": {
+                            args: [
+                                accounts[0],
+                                accounts[2],
+                                '$ERC20Token',
+                                timeout
+                            ],
+                            "fromIndex":1
+                        }
                     }
-                }
-            }, done);
+                }, done);
+                allAccounts = accounts;
+            });
         });
-    });
 
     it("STK Token is deployed ", function()
     {
