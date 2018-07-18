@@ -3,7 +3,7 @@ pragma solidity ^0.4.23;
 import "./ERC20Token.sol";
 import "./SafeMathLib.sol";
 
-library STKChannelLibrary
+library STKLibrary
 {
     using SafeMathLib for uint;
 
