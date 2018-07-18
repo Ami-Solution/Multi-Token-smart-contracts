@@ -42,7 +42,13 @@ library STKLibrary
 
     modifier callerIsChannelParticipant(STKChannelData storage data)
     {
-        require(msg.sender == data.recipientAddress_  || msg.sender == data.userAddress_);
+        require(msg.sender == data.recipientAddress_||msg.sender == data.userAddress_);
+        _;
+    }
+
+    modifier isSufficientBalance(STKChannelData storage data, uint amount, address channelAddress)
+    {
+        require(amount <= data.token_.balanceOf(channelAddress));
         _;
     }
 
@@ -67,11 +73,12 @@ library STKLibrary
         public
         channelIsOpen(data)
         callerIsChannelParticipant(data)
+        isSufficientBalance(data, _amount, _channelAddress)
     {
-        require(_amount <= data.token_.balanceOf(_channelAddress));
         address signerAddress = recoverAddressFromHashAndParameters(_addressOfToken, _nonce,_amount,_r,_s,_v);
         require((signerAddress == data.signerAddress_ && data.recipientAddress_  == msg.sender) || (signerAddress == data.recipientAddress_  && data.signerAddress_==msg.sender));
         require(signerAddress!=msg.sender);
+        require(data.closedNonce_ < _nonce);
         data.amountOwed_ = _amount;
         data.closedNonce_ = _nonce;
         data.closedBlock_ = block.number;
@@ -85,9 +92,9 @@ library STKLibrary
         public
         channelIsOpen(data)
         callerIsChannelParticipant(data)
-        {
-            data.closedBlock_ = block.number;
-        }
+      {
+        data.closedBlock_ = block.number;
+      }
 
     /**
     * @notice Function to contest the closing state of the payment channel. Will be able to be called for a time period (in blocks) given by timeout after closing of the channel.
@@ -110,12 +117,11 @@ library STKLibrary
         public
         callerIsChannelParticipant(data)
         channelAlreadyClosed(data)
+        isSufficientBalance(data, _amount, _channelAddress)
     {
-        require(data.token_.balanceOf(_channelAddress) >= _amount);
         address signerAddress = recoverAddressFromHashAndParameters(_addressOfToken, _nonce,_amount,_r,_s,_v);
         require(signerAddress == data.signerAddress_);
-        //require that the nonce of this transaction be higher than the previous closing nonce
-        require(_nonce > data.closedNonce_);
+        require(data.closedNonce_ < _nonce);
         data.closedNonce_ = _nonce;
         //update the amount
         data.amountOwed_ = _amount;
@@ -130,18 +136,18 @@ library STKLibrary
         channelAlreadyClosed(data)
         timeoutOver(data)
         callerIsChannelParticipant(data)
+        isSufficientBalance(data, data.amountOwed_, _channelAddress)
+
     {
-        require(data.token_.balanceOf(_channelAddress)>=data.amountOwed_);
         uint returnToUserAmount = data.token_.balanceOf(_channelAddress).minus(data.amountOwed_);
         uint owedAmount = data.amountOwed_;
         data.amountOwed_ = 0;
 
         data.closedBlock_ = 0;
-        data.closedNonce_ = 0;
 
         if(owedAmount > 0)
         {
-            require(data.token_.transfer(data.recipientAddress_ ,owedAmount));
+            require(data.token_.transfer(data.recipientAddress_,owedAmount));
         }
 
         if(returnToUserAmount > 0 && _returnToken)
