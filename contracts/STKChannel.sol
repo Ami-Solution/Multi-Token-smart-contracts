@@ -134,7 +134,7 @@ contract STKChannel
     }
 
     function getChannelData(address _addressOfToken) view public returns (address, address, address, uint, uint, uint, uint, uint) {
-        var channel = channels[_addressOfToken];
+        STKLibrary.STKChannelData channel = channels[_addressOfToken];
         return (channel.userAddress_,
         channel.signerAddress_,
         channel.recipientAddress_,

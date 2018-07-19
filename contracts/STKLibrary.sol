@@ -92,9 +92,9 @@ library STKLibrary
         public
         channelIsOpen(data)
         callerIsChannelParticipant(data)
-      {
+    {
         data.closedBlock_ = block.number;
-      }
+    }
 
     /**
     * @notice Function to contest the closing state of the payment channel. Will be able to be called for a time period (in blocks) given by timeout after closing of the channel.
