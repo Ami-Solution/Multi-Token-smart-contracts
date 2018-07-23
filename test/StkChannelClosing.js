@@ -14,7 +14,7 @@ contract("Testing STKChannel", function () {
     let allAccounts;
     const timeout = 10;
     const initialCreation = 1000000000;
-    const signersPk = Buffer.from('f4ebc8adae40bfc741b0982c206061878bffed3ad1f34d67c94fa32c3d33eac8', 'hex');
+    const signersPk = Buffer.from('privateKeyOfThirdAddress', 'hex');
     
     config({
         deployment: {
