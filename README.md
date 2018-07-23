@@ -28,7 +28,7 @@ Use the third private key address in the CLI and replace this with the `signerPk
 
 **Beware**: IF the tests do not work as expected, especially causing `VM Exception: Revert`, it is likely you forgot to replace the signer's private key, in which case, tests are not expected to work. 
 
-You can start the instance using Embark through the command: `embark simulator`. 
+You can start the instance using Embark through the command: `embark simulator`. Replace the port with the instances in all the tests. 
 
 ## Running Tests
 
