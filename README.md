@@ -38,6 +38,8 @@ Run tests using
 
 ## Deploy to local testnet
 
-This will also generate a deployedAddress.json for other application to read from
+You can deploy your tests by running: 
 
-`embark run` 
+`embark run testnet` 
+
+Ensure that you have MNEMONIC and INFURA declared in your process environment. 
