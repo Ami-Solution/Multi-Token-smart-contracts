@@ -17,6 +17,7 @@ library STKLibrary
         uint amountOwed_;
         uint closedBlock_;
         uint closedNonce_;
+        bool shouldReturn_; 
     }
 
     event LogChannelSettled(uint blockNumber, uint finalBalance);
@@ -69,7 +70,9 @@ library STKLibrary
         uint _amount,
         uint8 _v,
         bytes32 _r,
-        bytes32 _s)
+        bytes32 _s,
+        bool _returnToken
+        )
         public
         channelIsOpen(data)
         callerIsChannelParticipant(data)
@@ -82,6 +85,7 @@ library STKLibrary
         data.amountOwed_ = _amount;
         data.closedNonce_ = _nonce;
         data.closedBlock_ = block.number;
+        data.shouldReturn_ = _returnToken; 
     }
 
     /**
@@ -131,7 +135,7 @@ library STKLibrary
     * @notice After the timeout of the channel after closing has passed, can be called by either participant to withdraw funds.
     * @param data The channel specific data to work on.
     */
-    function settle(STKChannelData storage data, address _channelAddress, bool _returnToken)
+    function settle(STKChannelData storage data, address _channelAddress)
         public
         channelAlreadyClosed(data)
         timeoutOver(data)
@@ -150,7 +154,7 @@ library STKLibrary
             require(data.token_.transfer(data.recipientAddress_,owedAmount));
         }
 
-        if(returnToUserAmount > 0 && _returnToken)
+        if(returnToUserAmount > 0 && data.shouldReturn_)
         {
             require(data.token_.transfer(data.userAddress_,returnToUserAmount));
         }

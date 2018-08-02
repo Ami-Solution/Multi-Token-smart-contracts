@@ -54,6 +54,7 @@ contract STKChannel
         channels[_addressOfToken].signerAddress_ = _addressOfSigner;
         channels[_addressOfToken].recipientAddress_ = msg.sender;
         channels[_addressOfToken].timeout_ = _expiryNumberOfBlocks;
+        channels[_addressOfToken].shouldReturn_ = false;
 
         emit LogChannelOpened(channels[_addressOfToken].userAddress_, channels[_addressOfToken].recipientAddress_, block.number);
     }
@@ -72,11 +73,13 @@ contract STKChannel
         uint _amount,
         uint8 _v,
         bytes32 _r,
-        bytes32 _s)
+        bytes32 _s,
+        bool _returnToken
+        )
         external
         channelExists(_addressOfToken)
     {
-        channels[_addressOfToken].close(address(this), _addressOfToken, _nonce, _amount, _v,_r,_s);
+        channels[_addressOfToken].close(address(this), _addressOfToken, _nonce, _amount, _v,_r,_s, _returnToken);
         emit LogChannelClosed(block.number, msg.sender, _amount);
     }
 
@@ -117,11 +120,11 @@ contract STKChannel
     /**
     * @notice After the timeout of the channel after closing has passed, can be called by either participant to withdraw funds.
     */
-    function settle( address _addressOfToken, bool _returnToken)
+    function settle( address _addressOfToken)
         external
         channelExists(_addressOfToken)        
     {
-        channels[_addressOfToken].settle(address(this), _returnToken);
+        channels[_addressOfToken].settle(address(this));
     }
 
     function addChannel(address _addressOfToken, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
@@ -133,14 +136,13 @@ contract STKChannel
         channels[_addressOfToken].addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
     }
 
-    function getChannelData(address _addressOfToken) view public returns (address, address, address, uint, uint, uint, uint, uint) {
+    function getChannelData(address _addressOfToken) view public returns (address, address, address, uint, uint, uint, uint) {
         STKLibrary.STKChannelData channel = channels[_addressOfToken];
         return (channel.userAddress_,
         channel.signerAddress_,
         channel.recipientAddress_,
         channel.timeout_,
         channel.amountOwed_,
-        block.number,
         channel.closedBlock_,
         channel.closedNonce_);
     }
