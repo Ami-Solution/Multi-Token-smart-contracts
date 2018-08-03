@@ -5,6 +5,7 @@ const STKLibrary = require('Embark/contracts/STKLibrary');
 const indexes = require('./helpers/ChannelDataIndexes.js')
 const StandardToken = require('Embark/contracts/StandardToken.sol');
 const Token = require('Embark/contracts/Token.sol');
+const port = 8545; 
 
 
 contract("Testing ERC20 Token", function () {
@@ -16,7 +17,7 @@ contract("Testing ERC20 Token", function () {
     config({
         deployment: {
             "host": "localhost",
-            "port": 8545,
+            "port": port,
             "type": "rpc"
         }
     });
@@ -29,7 +30,7 @@ contract("Testing ERC20 Token", function () {
             config({
                 "deployment": {
                     "host": "localhost",
-                    "port": 8555,
+                    "port": port,
                     "type": "rpc",
                     "accounts": [
                         // {
