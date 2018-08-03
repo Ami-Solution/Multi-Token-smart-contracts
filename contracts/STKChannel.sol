@@ -87,11 +87,12 @@ contract STKChannel
     * @notice Function to close the payment channel without a signature.
     */
     function closeWithoutSignature(
-        address _addressOfToken)
+        address _addressOfToken, 
+        bool _returnToken)
         external
         channelExists(_addressOfToken)
     {
-        channels[_addressOfToken].closeWithoutSignature();
+        channels[_addressOfToken].closeWithoutSignature(_returnToken);
         emit LogChannelClosed(block.number, msg.sender, channels[_addressOfToken].amountOwed_);
     }
 
@@ -109,11 +110,12 @@ contract STKChannel
         uint _amount,
         uint8 _v,
         bytes32 _r,
-        bytes32 _s)
+        bytes32 _s, 
+        bool _returnToken)
         external
         channelExists(_addressOfToken)
     {
-        channels[_addressOfToken].updateClosedChannel(address(this), _addressOfToken, _nonce, _amount, _v, _r, _s);
+        channels[_addressOfToken].updateClosedChannel(address(this), _addressOfToken, _nonce, _amount, _v, _r, _s, _returnToken);
         emit LogChannelContested(_amount, msg.sender);
     }
 
@@ -136,7 +138,7 @@ contract STKChannel
         channels[_addressOfToken].addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
     }
 
-    function getChannelData(address _addressOfToken) view public returns (address, address, address, uint, uint, uint, uint) {
+    function getChannelData(address _addressOfToken) view public returns (address, address, address, uint, uint, uint, uint, bool) {
         STKLibrary.STKChannelData channel = channels[_addressOfToken];
         return (channel.userAddress_,
         channel.signerAddress_,
@@ -144,6 +146,7 @@ contract STKChannel
         channel.timeout_,
         channel.amountOwed_,
         channel.closedBlock_,
-        channel.closedNonce_);
+        channel.closedNonce_, 
+        channel.shouldReturn_);
     }
 }

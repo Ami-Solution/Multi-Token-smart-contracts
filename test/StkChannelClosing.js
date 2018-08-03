@@ -7,6 +7,7 @@ const StandardToken = require('Embark/contracts/StandardToken.sol');
 const Token = require('Embark/contracts/Token.sol');
 const closingHelper = require('./helpers/channelClosingHelper');
 const assertRevert = require('./helpers/assertRevert');
+const port = 8545; 
 
 
 contract("Testing STKChannel", function () {
@@ -14,12 +15,12 @@ contract("Testing STKChannel", function () {
     let allAccounts;
     const timeout = 10;
     const initialCreation = 1000000000;
-    const signersPk = Buffer.from('privateKeyOfThirdAddress', 'hex');
+    const signersPk = Buffer.from('f4ebc8adae40bfc741b0982c206061878bffed3ad1f34d67c94fa32c3d33eac8', 'hex');
     
     config({
         deployment: {
             "host": "localhost",
-            "port": 8545,
+            "port": port,
             "type": "rpc"
         }
     });
@@ -32,7 +33,7 @@ contract("Testing STKChannel", function () {
             config({
                 "deployment": {
                     "host": "localhost",
-                    "port": 8555,
+                    "port": port,
                     "type": "rpc",
                     "accounts": [
                         // {
@@ -142,11 +143,12 @@ contract("Testing STKChannel", function () {
         {
             const nonce = 1;
             const amount = 2;
+            const returnToken = false; 
             const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
             
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:allAccounts[6]});
+                await STKChannel.methods.close(ERC20Token.options.address,nonce,amount,cryptoParams.v,cryptoParams.r,cryptoParams.s,returnToken).send({from:allAccounts[6]});
                 assert.fail("Incorrect signature (self-signed) should not be allowed");
             }
             catch (error)
@@ -160,9 +162,10 @@ contract("Testing STKChannel", function () {
         {
             const nonce = 2;
             const amount = 0;
+            const returnToken = false; 
             const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
             
-            await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:allAccounts[1]});
+            await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:allAccounts[1]});
             const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
             
             const closedNonce = data[indexes.CLOSED_NONCE];
@@ -179,7 +182,7 @@ contract("Testing STKChannel", function () {
             try
             {
                 dataBefore  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
-                await STKChannel.methods.settle(ERC20Token.options.address,false).send({from:allAccounts[1]});
+                await STKChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
                 assert.fail("Participant should not be able to settle before time period is over");
             }
             catch (error)
@@ -200,7 +203,7 @@ contract("Testing STKChannel", function () {
             
             try
             {
-                await STKChannel.methods.close(allAccounts[6],nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:allAccounts[6]});
+                await STKChannel.methods.close(allAccounts[6],nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[6]});
                 assert.fail("Should not be able to close invalid token address");
             }
             catch (error)
@@ -237,7 +240,7 @@ contract("Testing STKChannel", function () {
             
             try
             {
-                await STKChannel.methods.close(allAccounts[6],nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:allAccounts[1]});
+                await STKChannel.methods.close(allAccounts[6],nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[1]});
                 assert.fail("Non-participants should not be able to add custom tokens");
             }
             catch (error)
@@ -255,7 +258,7 @@ contract("Testing STKChannel", function () {
             
             try
             {
-                await STKChannel.methods.close(allAccounts[1],nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:allAccounts[1]});
+                await STKChannel.methods.close(allAccounts[1],nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[1]});
                 assert.fail("Customers should not be able to add custom tokens");
             }
             catch (error)
@@ -289,7 +292,7 @@ contract("Testing STKChannel", function () {
             
             try
             {
-                await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:allAccounts[1]});
+                await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[1]});
                 assert.fail("Should not be able to use the same nonce for contesting channel");
             }
             catch (error)
@@ -307,7 +310,7 @@ contract("Testing STKChannel", function () {
             
             try
             {
-                await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:allAccounts[1]});
+                await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[1]});
                 assert.fail("Amount trying to update closed channel is greater than deposited amount");
             }
             catch (error)
@@ -325,7 +328,7 @@ contract("Testing STKChannel", function () {
             
             try
             {
-                await STKChannel.methods.updateClosedChannel(WETHToken.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:allAccounts[1]});
+                await STKChannel.methods.updateClosedChannel(WETHToken.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[1]});
                 assert.fail("Participant should not be allowed to update an open channel");
             }
             catch (error)
@@ -343,7 +346,7 @@ contract("Testing STKChannel", function () {
             
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:allAccounts[1]});
+                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[1]});
                 assert.fail("Channel participant should not be able to close an already closed channel");
             }
             catch (error)
@@ -356,14 +359,16 @@ contract("Testing STKChannel", function () {
         {
             const nonce = 4;
             const amount = 25;
+            const returnToken = true; 
             
             const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
             
-            await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:allAccounts[1]});
+            await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, returnToken).send({from:allAccounts[1]});
             const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
             
             assert.equal(data[indexes.AMOUNT_OWED],amount,"New closing amount should have updated");
             assert.equal(data[indexes.CLOSED_NONCE],nonce,"New closing nonce should be updated")
+            assert.equal(data[indexes.SHOULD_RETURN],returnToken, "New return token bool should be updated");
         });
         
         it("Channel participant should not be able to settle an open channel", async() =>
@@ -374,7 +379,7 @@ contract("Testing STKChannel", function () {
             
             try
             {
-                await STKChannel.methods.settle(WETHToken.options.address,true).send({from:allAccounts[1]});
+                await STKChannel.methods.settle(WETHToken.options.address).send({from:allAccounts[1]});
                 assert.fail("Channel participant should not be able to settle an open channel");
             }
             catch (error)
@@ -390,18 +395,19 @@ contract("Testing STKChannel", function () {
         it("Should transfer funds to user once settled", async() =>
         {
             const dataBefore  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
-            
+
             const depositedTokens = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
             const oldStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
             const oldUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
             const amountOwed = dataBefore[indexes.AMOUNT_OWED];
             
-            await STKChannel.methods.settle(ERC20Token.options.address,true).send({from:allAccounts[1]});
+            await STKChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
             const dataAfter  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
             
             const newUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
             const newStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
             
+            assert.strictEqual(dataBefore[indexes.SHOULD_RETURN],true,"Should return_token should have been set to true");
             assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf())>0,"Amount owed before settling should be greater than 0");
             assert.strictEqual(parseInt(dataAfter[indexes.AMOUNT_OWED].valueOf()),0,"Amount owed after settling should be 0");
             assert.strictEqual(parseInt(dataBefore[indexes.CLOSED_NONCE].valueOf()),parseInt(dataAfter[indexes.CLOSED_NONCE].valueOf()),"closed nonce should not have been reset on settle");
@@ -420,7 +426,7 @@ contract("Testing STKChannel", function () {
             const nonce = 10;
             const amount = 5;
             const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
-            await STKChannel.methods.close(ERC20Token.options.address,nonce,amount,cryptoParams.v,cryptoParams.r,cryptoParams.s).send({from:allAccounts[1]});
+            await STKChannel.methods.close(ERC20Token.options.address,nonce,amount,cryptoParams.v,cryptoParams.r,cryptoParams.s,false).send({from:allAccounts[1]});
             
             for (i = 0; i<=timeout; i++)
             {
@@ -435,7 +441,7 @@ contract("Testing STKChannel", function () {
             const amountOwed = dataBefore[indexes.AMOUNT_OWED];
             const oldChannelBalance = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
 
-            await STKChannel.methods.settle(ERC20Token.options.address,false).send({from:allAccounts[1]});
+            await STKChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
             const dataAfter  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
             
             const newUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();

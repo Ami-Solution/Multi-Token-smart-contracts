@@ -5,6 +5,7 @@ const STKLibrary = require('Embark/contracts/STKLibrary');
 const indexes = require('./helpers/ChannelDataIndexes.js')
 const StandardToken = require('Embark/contracts/StandardToken.sol');
 const Token = require('Embark/contracts/Token.sol');
+const port = 8545;
 
 contract("Testing STKChannel", function () {
     this.timeout(0);
@@ -15,7 +16,7 @@ contract("Testing STKChannel", function () {
     config({
         deployment: {
             "host": "localhost",
-            "port": 8545,
+            "port": port,
             "type": "rpc"
         }
     });
@@ -28,7 +29,7 @@ contract("Testing STKChannel", function () {
             config({
                 "deployment": {
                     "host": "localhost",
-                    "port": 8555,
+                    "port": port,
                     "type": "rpc",
                     "accounts": [
                         // {
@@ -115,8 +116,8 @@ contract("Testing STKChannel", function () {
         })
         it("STK channel should close without signature",async() =>
         {
-            await STKChannel.methods.closeWithoutSignature(ERC20Token.options.address).send();
-            const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            await STKChannel.methods.closeWithoutSignature(ERC20Token.options.address,true).send();
+            const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address,).call();
 
             const block = data[indexes.CLOSED_BLOCK];
 

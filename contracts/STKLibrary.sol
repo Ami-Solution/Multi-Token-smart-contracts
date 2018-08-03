@@ -92,11 +92,12 @@ library STKLibrary
     * @notice Function to close the payment channel without a signature.
     * @param data The channel specific data to work on.
     */
-    function closeWithoutSignature(STKChannelData storage data)
+    function closeWithoutSignature(STKChannelData storage data, bool _returnToken)
         public
         channelIsOpen(data)
         callerIsChannelParticipant(data)
     {
+        data.shouldReturn_ = _returnToken; 
         data.closedBlock_ = block.number;
     }
 
@@ -117,7 +118,8 @@ library STKLibrary
         uint _amount,
         uint8 _v,
         bytes32 _r,
-        bytes32 _s)
+        bytes32 _s,
+        bool _returnToken)
         public
         callerIsChannelParticipant(data)
         channelAlreadyClosed(data)
@@ -128,6 +130,7 @@ library STKLibrary
         require(data.closedNonce_ < _nonce);
         data.closedNonce_ = _nonce;
         //update the amount
+        data.shouldReturn_ = _returnToken; 
         data.amountOwed_ = _amount;
     }
 
