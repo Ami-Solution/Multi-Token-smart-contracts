@@ -116,7 +116,7 @@ contract("Testing STKChannel", function () {
         })
         it("STK channel should close without signature",async() =>
         {
-            await STKChannel.methods.closeWithoutSignature(ERC20Token.options.address,true).send();
+            await STKChannel.methods.closeWithoutSignature(ERC20Token.options.address).send();
             const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address,).call();
 
             const block = data[indexes.CLOSED_BLOCK];

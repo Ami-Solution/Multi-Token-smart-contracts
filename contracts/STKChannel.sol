@@ -87,12 +87,11 @@ contract STKChannel
     * @notice Function to close the payment channel without a signature.
     */
     function closeWithoutSignature(
-        address _addressOfToken, 
-        bool _returnToken)
+        address _addressOfToken)
         external
         channelExists(_addressOfToken)
     {
-        channels[_addressOfToken].closeWithoutSignature(_returnToken);
+        channels[_addressOfToken].closeWithoutSignature();
         emit LogChannelClosed(block.number, msg.sender, channels[_addressOfToken].amountOwed_);
     }
 

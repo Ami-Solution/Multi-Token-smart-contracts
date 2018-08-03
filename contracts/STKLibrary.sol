@@ -92,12 +92,12 @@ library STKLibrary
     * @notice Function to close the payment channel without a signature.
     * @param data The channel specific data to work on.
     */
-    function closeWithoutSignature(STKChannelData storage data, bool _returnToken)
+    function closeWithoutSignature(STKChannelData storage data)
         public
         channelIsOpen(data)
         callerIsChannelParticipant(data)
     {
-        data.shouldReturn_ = _returnToken; 
+        data.shouldReturn_ = true; 
         data.closedBlock_ = block.number;
     }
 
