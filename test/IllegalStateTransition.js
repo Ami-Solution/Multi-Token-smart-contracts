@@ -6,9 +6,9 @@ const indexes = require('./helpers/ChannelDataIndexes.js')
 const StandardToken = require('Embark/contracts/StandardToken.sol');
 const Token = require('Embark/contracts/Token.sol');
 const closingHelper = require('./helpers/channelClosingHelper');
+const testConstant = require('./helpers/testConstant');
 const assertRevert = require('./helpers/assertRevert');
 const port = 8545;
-
 
 contract("Testing Illegal State Transitions", function () {
     this.timeout(0);
@@ -17,9 +17,9 @@ contract("Testing Illegal State Transitions", function () {
     let recipientAddress;
     const timeout = 10;
     const initialCreation = 1000000000;
-    const signersPk = Buffer.from('f4ebc8adae40bfc741b0982c206061878bffed3ad1f34d67c94fa32c3d33eac8', 'hex');
-    const userPk = Buffer.from('f942d5d524ec07158df4354402bfba8d928c99d0ab34d0799a6158d56156d986','hex');
-    const recipientPk = Buffer.from('88f37cfbaed8c0c515c62a17a3a1ce2f397d08bbf20dcc788b69f11b5a5c9791','hex');
+    const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
+    const userPk = Buffer.from(testConstant.USER_PK,'hex');
+    const recipientPk = Buffer.from(testConstant.RECIPIENT_PK,'hex');
     var nonce = 1;
 
     config({

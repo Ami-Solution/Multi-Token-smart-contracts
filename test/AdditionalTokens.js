@@ -6,6 +6,7 @@ const indexes = require('./helpers/ChannelDataIndexes.js')
 const StandardToken = require('Embark/contracts/StandardToken.sol');
 const Token = require('Embark/contracts/Token.sol');
 const closingHelper = require('./helpers/channelClosingHelper');
+const testConstant = require('./helpers/testConstant');
 const assertRevert = require('./helpers/assertRevert');
 const port = 8545;
 
@@ -17,7 +18,7 @@ contract("Testing Additional Tokens", function () {
     let recipientAddress;
     const timeout = 10;
     const initialCreation = 1000000000;
-    const signersPk = Buffer.from('f4ebc8adae40bfc741b0982c206061878bffed3ad1f34d67c94fa32c3d33eac8', 'hex');
+    const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
     var nonce = 1;
 
     config({

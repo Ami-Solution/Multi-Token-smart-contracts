@@ -6,6 +6,7 @@ const indexes = require('./helpers/ChannelDataIndexes.js')
 const StandardToken = require('Embark/contracts/StandardToken.sol');
 const Token = require('Embark/contracts/Token.sol');
 const closingHelper = require('./helpers/channelClosingHelper');
+const testConstant = require('./helpers/testConstant');
 const assertRevert = require('./helpers/assertRevert');
 const port = 8545;
 
@@ -15,8 +16,8 @@ contract("Testing Non Channel Participants", function () {
     let allAccounts;
     const timeout = 10;
     const initialCreation = 1000000000;
-    const signersPk = Buffer.from('f4ebc8adae40bfc741b0982c206061878bffed3ad1f34d67c94fa32c3d33eac8', 'hex');
-    const nonParticipant = Buffer.from('130137aa9a7fbc7cadc98c079cda47a999ff41931d9feaab621855beceed71f7','hex');
+    const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
+    const nonParticipant = Buffer.from(testConstant.NON_PARTICIPANT,'hex');
     var nonce = 1;
     
     config({
