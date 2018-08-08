@@ -10,7 +10,7 @@ const assertRevert = require('./helpers/assertRevert');
 const port = 8545;
 
 
-contract("Testing valid transactions made by STACK ", function () {
+contract("Testing valid transactions made by Recipient Address ", function () {
     this.timeout(0);
     let allAccounts;
     let userAddress;
@@ -106,7 +106,7 @@ contract("Testing valid transactions made by STACK ", function () {
             assert.equal(initialCreatorBalance.valueOf(), (initialCreation-transfer).valueOf(), "Initial creator should have transferred amount of tokens removed from account");
         })
 
-        it("STACK should be allowed to close the channel with a valid signature just under amount deposited", async() =>
+        it("Recipient Address should be allowed to close the channel with a valid signature just under amount deposited", async() =>
         {
             nonce++;
             const amount = 49;
@@ -123,7 +123,7 @@ contract("Testing valid transactions made by STACK ", function () {
             assert.notEqual(parseInt(closedBlock),0,"Closed block should not be set to 0");
         });
 
-        it("STACK should be allowed to contest the channel with valid signature equal to amount deposited", async() =>
+        it("Recipient Address should be allowed to contest the channel with valid signature equal to amount deposited", async() =>
         {
             nonce++;
             const amount = 50;
@@ -140,7 +140,7 @@ contract("Testing valid transactions made by STACK ", function () {
             assert.notEqual(parseInt(closedBlock),0,"Closed block should not be set to 0");
         });
 
-        it("STACK should be able to settle after time period with 0 tokens remaining in channel", async() =>
+        it("Recipient Address should be able to settle after time period with 0 tokens remaining in channel", async() =>
         {
             for (i = 0; i<=timeout; i++)
             {
@@ -171,7 +171,7 @@ contract("Testing valid transactions made by STACK ", function () {
             assert.equal(parseInt(newUserBalance.valueOf()),parseInt(oldUserBalance.valueOf()), 'The User address account value should remain the same');
         });
 
-        it("STACK should be allowed to close the channel with a valid signature less than amount deposited", async() =>
+        it("Recipient Address should be allowed to close the channel with a valid signature less than amount deposited", async() =>
         {
             const transfer = 50;
             await ERC20Token.methods.approve(STKChannel.options.address,transfer).send({from: allAccounts[3]});
@@ -192,7 +192,7 @@ contract("Testing valid transactions made by STACK ", function () {
             assert.notEqual(parseInt(closedBlock),0,"Closed block should not be set to 0");
         });
 
-        it("STACK should be allowed to settle channel with additional tokens remaining in the channel", async() =>
+        it("Recipient Address should be allowed to settle channel with additional tokens remaining in the channel", async() =>
         {
             for (i = 0; i<=timeout; i++)
             {
@@ -224,7 +224,7 @@ contract("Testing valid transactions made by STACK ", function () {
         });
 
 
-        it("STACK can close a channel with just under deposited", async() =>
+        it("Recipient Address can close a channel with just under deposited", async() =>
         {
             const transfer = 50;
             await ERC20Token.methods.approve(STKChannel.options.address,transfer).send({from: allAccounts[3]});
@@ -244,7 +244,7 @@ contract("Testing valid transactions made by STACK ", function () {
             assert.notEqual(parseInt(closedBlock),0,"Closed block should not be set to 0");
         });
 
-        it("STACK can update closed channel with amount equivalent to deposited", async() =>
+        it("Recipient Address can update closed channel with amount equivalent to deposited", async() =>
         {
             nonce++;
             const amount = 50;
@@ -261,7 +261,7 @@ contract("Testing valid transactions made by STACK ", function () {
             assert.notEqual(parseInt(closedBlock),0,"Closed block should not be set to 0");
         });
 
-        it("STACK can settle with funds returned back to user", async() =>
+        it("Recipient Address can settle with funds returned back to user", async() =>
         {
             for (i = 0; i<=timeout; i++)
             {
@@ -292,7 +292,7 @@ contract("Testing valid transactions made by STACK ", function () {
             assert.equal(parseInt(newUserBalance.valueOf()),parseInt(oldUserBalance.valueOf()), 'The User address account value should remain the same');
         });
 
-        it ("STACK can close channel with amount just under deposited", async () => 
+        it ("Recipient Address can close channel with amount just under deposited", async () => 
         { 
             const transfer = 50;
             await ERC20Token.methods.approve(STKChannel.options.address,transfer).send({from: allAccounts[3]});
@@ -312,7 +312,7 @@ contract("Testing valid transactions made by STACK ", function () {
             assert.notEqual(parseInt(closedBlock),0,"Closed block should not be set to 0");
         }); 
 
-        it("STACK can settle channel with funds returned", async() =>
+        it("Recipient Address can settle channel with funds returned", async() =>
         {
             for (i = 0; i<=timeout; i++)
             {
