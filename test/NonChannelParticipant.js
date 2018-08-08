@@ -111,6 +111,20 @@ contract("Testing Non Channel Participants", function () {
                 assert.ok(true);
             }
         })
+
+        it("Cannot close open channel without signature", async() => 
+        { 
+            try 
+            {
+                await STKChannel.methods.closeWithoutSignature(ERC20Token.options.address).send({from:accounts[3]}); 
+                assert.fail("Cannot close without signature"); 
+            } 
+            catch (error) 
+            { 
+                assertRevert(error); 
+                assert.ok(true); 
+            }
+        })
         
         it("Cannot close a channel with an invalid signature",async() =>
         {
@@ -154,6 +168,34 @@ contract("Testing Non Channel Participants", function () {
                 assertRevert(error);
             }
         });
+
+        it("Cannot close a closed channel without signature", async() => 
+        { 
+            try 
+            {
+                await STKChannel.methods.closeWithoutSignature(ERC20Token.options.address).send({from:accounts[3]}); 
+                assert.fail("Cannot close an already closed channel without signature"); 
+            } 
+            catch (error) 
+            { 
+                assertRevert(error); 
+                assert.ok(true); 
+            }
+        })        
+
+        it("Cannot close without signature on closed channel", async() => 
+        {
+            try 
+            {
+                await STKChannel.methods.closeWithoutSignature(ERC20Token.options.address).send({from:accounts[3]}); 
+                assert.fail("Cannot close without signature"); 
+            } 
+            catch (error) 
+            { 
+                assertRevert(error); 
+                assert.ok(true); 
+            }
+        }); 
 
         it("Cannot contest an open channel with a valid signature",async() =>
         {
@@ -218,7 +260,7 @@ contract("Testing Non Channel Participants", function () {
             try
             {
                 await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
-                assert.fail("Improperly signed  signature should not be able to close an already closed channel");
+                assert.fail("Improperly signed signature should not be able to close an already closed channel");
             }
             catch (error)
             {
@@ -236,7 +278,7 @@ contract("Testing Non Channel Participants", function () {
             try
             {
                 await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
-                assert.fail("Improperly signed  signature should not be able to close an already closed channel");
+                assert.fail("Non channel participant should not be able to contest channel with valid signature");
             }
             catch (error)
             {
@@ -244,17 +286,17 @@ contract("Testing Non Channel Participants", function () {
             }
         });        
         
-        it("Cannot contest channel with invalid signature", async() =>
+        it("Cannot contest channel with valid signature", async() =>
         {
             nonce++;
             const amount = 2;
             
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,nonParticipant);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
             
             try
             {
                 await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
-                assert.fail("Improperly signed  signature should not be able to close an already closed channel");
+                assert.fail("Should not be able to contest channel with invalid signature");
             }
             catch (error)
             {
@@ -280,7 +322,7 @@ contract("Testing Non Channel Participants", function () {
             }
         });     
 
-        it("Cannot settle", async() =>
+        it("Cannot settle a closed channel", async() =>
         {   
             try
             {

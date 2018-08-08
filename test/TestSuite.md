@@ -6,9 +6,11 @@
 * non channel participant closing an open channel w/ invalid sig
 * non channel participant contesting an open channel w/ valid sig
 * non channel participant contesting an open channel w/ invalid sig
+* non channel participant calling closeWithoutSig on open channel
 * non channel participant settling an open channel w/ valid sig
 * non channel participant closing a closed channel w/ valid sig
 * non channel participant closing a closed channel w/ invalid sig
+* non channel participant calling closeWithoutSig on closed channel
 * non channel participant contesting a closed channel w/ valid sig
 * non channel participant contesting a closed channel w/ invalid sig
 * non channel participant settling a closed channel 
@@ -23,6 +25,10 @@
 * STACK: cannot close channel with amount greater than deposited
 * User: cannot close channel with user-address-signed signature
 * STACK: cannot close a channel with a STACK-signed signature 
+
+* User: should not be able to closeWithoutSignature on an open channel 
+* STACK: should not be be able to closeWithoutSignature on an open channel 
+
 * User: cannot use same nonce for contesting channel 
 * STACK: cannot use same nonce for contesting channel
 * User: cannot use same nonce as previously used to close
@@ -69,18 +75,29 @@
 * User: closes channel with amount just under deposited 
 * User: settles channel with funds returned 
 
+-- 
+
+* Insert 50 tokens into the channel 
+* Close without signature 
+
 ## STACK Valid Transactions 
 
 * STACK: closes channel with amount less than deposited 
 * STACK: contests channel with amount equivalent to deposited 
 * STACK: settles channel with funds remaining inside (equivalent to 0) 
 
+--
+
 * STACK: closes channel with amount less than deposited 
 * STACK: contests channel with amount equivalent to deposited 
 * STACK: settles channel with funds not remaining inside (equivalent to 0) 
 
+--
+
 * STACK: closes channel with amount less than deposited
 * STACK: settles channel with funds remaining in channel 
+
+--
 
 * STACK: closes channel with amount less than deposited
 * STACK: settles channel with funds not remaining in channel 

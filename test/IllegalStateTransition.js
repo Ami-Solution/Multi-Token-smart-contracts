@@ -291,12 +291,10 @@ contract("Testing Illegal State Transitions", function () {
 
         it("STACK cannot close a closed channel", async() =>
         {
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
-
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:stackAddress});
-                assert.fail("STACK cannot close a closed channel");
+                await STKChannel.methods.closeWithoutSignature().send({from:stackAddress}); 
+                assert.fail("STACK should not be able to close without sig on an already closed channel");
             }
             catch (error)
             {
@@ -304,6 +302,31 @@ contract("Testing Illegal State Transitions", function () {
             }
         });
 
+        it("User should not be able to close without signature on an already closed channel", async() =>
+        {
+            try
+            {
+                await STKChannel.methods.closeWithoutSignature().send({from:userAddress}); 
+                assert.fail("User should not be able to close without sig on an already closed channel");
+            }
+            catch (error)
+            {
+                assertRevert(error);
+            }
+        });
+
+        it("STACK should not be able to close without signature on an already closed channel", async() =>
+        {
+            try
+            {
+                await STKChannel.methods.closeWithoutSignature().send({from:stackAddress}); 
+                assert.fail("STACK should not be able to close without sig on an already closed channel");
+            }
+            catch (error)
+            {
+                assertRevert(error);
+            }
+        });
         it("User should not contest an amount greater than deposited", async() =>
         {
             amount = 10000;

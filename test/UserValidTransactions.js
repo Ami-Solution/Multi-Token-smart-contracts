@@ -228,7 +228,7 @@ contract("Testing Valid Transactions made by User", function () {
         {
             const transfer = 50;
             await ERC20Token.methods.approve(STKChannel.options.address,transfer).send({from: allAccounts[3]});
-            await ERC20Token.methods.transfer(STKChannel.options.address, transfer).send({from: allAccounts[3]});            
+            await ERC20Token.methods.transfer(STKChannel.options.address, transfer).send({from: allAccounts[3]});
             nonce++;
             const amount = 49;
             const returnToken = false;
@@ -292,14 +292,14 @@ contract("Testing Valid Transactions made by User", function () {
             assert.equal(parseInt(newUserBalance.valueOf()),parseInt(oldUserBalance.valueOf()), 'The User address account value should remain the same');
         });
 
-        it ("User can close channel with amount just under deposited", async () => 
-        { 
+        it ("User can close channel with amount just under deposited", async () =>
+        {
             const transfer = 50;
             await ERC20Token.methods.approve(STKChannel.options.address,transfer).send({from: allAccounts[3]});
-            await ERC20Token.methods.transfer(STKChannel.options.address, transfer).send({from: allAccounts[3]});                        
+            await ERC20Token.methods.transfer(STKChannel.options.address, transfer).send({from: allAccounts[3]});
             nonce++;
             const amount = 49;
-            const returnToken = false;
+            const returnToken = true;
             const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.options.address,stackPk);
 
             await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
@@ -310,7 +310,7 @@ contract("Testing Valid Transactions made by User", function () {
 
             assert.equal(parseInt(closedNonce),nonce,"Nonces should be equal");
             assert.notEqual(parseInt(closedBlock),0,"Closed block should not be set to 0");
-        }); 
+        });
 
         it("User can settle channel with funds returned", async() =>
         {
@@ -318,29 +318,68 @@ contract("Testing Valid Transactions made by User", function () {
             {
                 var transaction = {from:allAccounts[7],to:allAccounts[8],gasPrice:1000000000,value:2};
                 web3.eth.sendTransaction(transaction);
-            }
-
-            const oldUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
-            const depositedTokens = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
+            }            
             const dataBefore  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
-            const oldStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
-            const amountOwed = dataBefore[indexes.AMOUNT_OWED];
-            const oldChannelBalance = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
 
+            const depositedTokens = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
+            const oldStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
+            const oldUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
+            const amountOwed = dataBefore[indexes.AMOUNT_OWED];
+            
             await STKChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
             const dataAfter  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
-
+            
             const newUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
             const newStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
-            const newChannelBalance = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
-
-
+            
+            assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf())>0,"Amount owed before settling should be equal to 0");
+            assert.strictEqual(dataBefore[indexes.SHOULD_RETURN],true,"Should return_token should have been set to true");
             assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf())>0,"Amount owed before settling should be greater than 0");
             assert.strictEqual(parseInt(dataAfter[indexes.AMOUNT_OWED].valueOf()),0,"Amount owed after settling should be 0");
             assert.strictEqual(parseInt(dataBefore[indexes.CLOSED_NONCE].valueOf()),parseInt(dataAfter[indexes.CLOSED_NONCE].valueOf()),"closed nonce should not have been reset on settle");
-            assert.equal(parseInt(newStackBalance.valueOf()),parseInt(oldStackBalance.valueOf()) + parseInt(amountOwed.valueOf()), 'The stack account value should be credited');
-            assert.equal(parseInt(newChannelBalance.valueOf()),parseInt(oldChannelBalance.valueOf()) - parseInt(amountOwed.valueOf()), 'Unspent token should remain in the channel account');
-            assert.equal(parseInt(newUserBalance.valueOf()),parseInt(oldUserBalance.valueOf()), 'The User address account value should remain the same');
+            assert.equal(parseInt(newStackBalance.valueOf()), parseInt(oldStackBalance.valueOf()) + parseInt(amountOwed.valueOf()), 'The stack account value should be credited');
+            assert.equal(parseInt(newUserBalance.valueOf()),parseInt(oldUserBalance.valueOf()) + parseInt(depositedTokens.valueOf()) - parseInt(amountOwed.valueOf()),'The User address should get back the unused tokens');
+        });
+
+        it("User can close without signature if no IOUs exist", async() =>
+        {
+            const transfer = 50;
+            await ERC20Token.methods.approve(STKChannel.options.address,transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.transfer(STKChannel.options.address, transfer).send({from: allAccounts[3]});
+
+            await STKChannel.methods.closeWithoutSignature(ERC20Token.options.address).send({from:userAddress});
+            const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+
+            assert.strictEqual(data[indexes.SHOULD_RETURN],true,"Close without signature should set retunToken to true");
+            assert(data[indexes.CLOSED_BLOCK]>0, "closed block should be greater than 0");
+        });
+
+        it("User settling funds must return after closeWithoutSig", async() =>
+        {
+            for (i = 0; i<=timeout; i++)
+            {
+                var transaction = {from:allAccounts[7],to:allAccounts[8],gasPrice:1000000000,value:2};
+                web3.eth.sendTransaction(transaction);
+            }            
+            const dataBefore  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+
+            const depositedTokens = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
+            const oldStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
+            const oldUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
+            const amountOwed = dataBefore[indexes.AMOUNT_OWED];
+            
+            await STKChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
+            const dataAfter  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            
+            const newUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
+            const newStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
+            
+            assert.strictEqual(dataBefore[indexes.SHOULD_RETURN],true,"Should return_token should have been set to true");
+            assert.strictEqual(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf()),0,"Amount owed before settling should be equal to 0");
+            assert.strictEqual(parseInt(dataAfter[indexes.AMOUNT_OWED].valueOf()),0,"Amount owed after settling should be 0");
+            assert.strictEqual(parseInt(dataBefore[indexes.CLOSED_NONCE].valueOf()),parseInt(dataAfter[indexes.CLOSED_NONCE].valueOf()),"closed nonce should not have been reset on settle");
+            assert.equal(parseInt(newStackBalance.valueOf()), parseInt(oldStackBalance.valueOf()) + parseInt(amountOwed.valueOf()), 'The stack account value should be credited');
+            assert.equal(parseInt(newUserBalance.valueOf()),parseInt(oldUserBalance.valueOf()) + parseInt(depositedTokens.valueOf()) - parseInt(amountOwed.valueOf()),'The User address should get back the unused tokens');
         });
 
     });
