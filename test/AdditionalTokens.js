@@ -127,10 +127,10 @@ contract("Testing Additional Tokens", function () {
             }
         })
 
-        it ("STACK should be able to add tokens", async() =>
+        it ("Recipient Address should be able to add tokens", async() =>
         {
             await STKChannel.methods.addChannel(WETHToken.options.address,userAddress,stackAddress,10).send({from:stackAddress});
-            assert("STACK should be able to add tokens");
+            assert("Recipient Address should be able to add tokens");
 
         })
 
@@ -147,12 +147,12 @@ contract("Testing Additional Tokens", function () {
             }
         })
 
-        it ("STACK should not be able to add duplicate tokens", async() =>
+        it ("Recipient Address should not be able to add duplicate tokens", async() =>
         {
             try
             {
                 await STKChannel.methods.addChannel(ThingToken.options.address,userAddress,stackAddress,10).send({from:stackAddress})
-                assert.fail("STACK should never be able to add duplicate tokens");
+                assert.fail("Recipient Address should never be able to add duplicate tokens");
             }
             catch (error)
             {
@@ -180,7 +180,7 @@ contract("Testing Additional Tokens", function () {
             }
         });
 
-        it("STACK cannot close an uninitialized channel", async() =>
+        it("Recipient Address cannot close an uninitialized channel", async() =>
         {
 
             amount = 0;
@@ -214,7 +214,7 @@ contract("Testing Additional Tokens", function () {
             }
         });
 
-        it("STACK cannot settle an uninitialized channel", async() =>
+        it("Recipient Address cannot settle an uninitialized channel", async() =>
         {
 
             amount = 0;
@@ -223,7 +223,7 @@ contract("Testing Additional Tokens", function () {
             try
             {
                 await STKChannel.methods.settle(ThingToken.options.address).send({from:stackAddress});
-                assert.fail("STACK cannot settle an uninitialized channel");
+                assert.fail("Recipient Address cannot settle an uninitialized channel");
             }
             catch (error)
             {
