@@ -79,7 +79,7 @@ library STKLibrary
         isSufficientBalance(data, _amount, _channelAddress)
     {
         address signerAddress = recoverAddressFromHashAndParameters(_addressOfToken, _nonce,_amount,_r,_s,_v);
-        require((signerAddress == data.signerAddress_ && data.recipientAddress_  == msg.sender) || (signerAddress == data.recipientAddress_  && data.signerAddress_==msg.sender));
+        require((signerAddress == data.signerAddress_ && data.recipientAddress_  == msg.sender) || (signerAddress == data.recipientAddress_  && data.userAddress_==msg.sender));
         require(signerAddress!=msg.sender);
         require(data.closedNonce_ < _nonce);
         data.amountOwed_ = _amount;

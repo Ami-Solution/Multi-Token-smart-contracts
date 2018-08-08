@@ -18,7 +18,11 @@ Solidity v0.4.23 (solc-js)
 Ganache CLI v6.1.0 (ganache-core: 2.1.0)
 ```
 
-By default, the repo assumes that the third address is the Signer's address. This address is required for signing. **Note: Your address may be different than the one shown in the example below.** Copy and paste the private key of this address into `./test/StkChannelClosing.js` and replace `signerPk` with the one on your local machine. Instructions for `Ganache` and `ganache-cli` are outlined below. 
+By default, the repo assumes the following: 
+ - address[0]: user's address 
+ - address[1]: signer's address 
+ - address[2]: recipient's address 
+Take the above and their respective private keys and paste them in the [testConstants file](./test/helpers/testConstant.js)
 
 ### Ganache Command Line Interface 
 
