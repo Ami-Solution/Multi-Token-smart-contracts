@@ -13,13 +13,10 @@ const port = 8545;
 contract("Testing valid transactions made by Recipient Address ", function () {
     this.timeout(0);
     let allAccounts;
-    let userAddress;
-    let stackAddress;
+    let recipientAddress;
     const timeout = 10;
     const initialCreation = 1000000000;
     const signersPk = Buffer.from('f4ebc8adae40bfc741b0982c206061878bffed3ad1f34d67c94fa32c3d33eac8', 'hex');
-    const userPk = Buffer.from('f942d5d524ec07158df4354402bfba8d928c99d0ab34d0799a6158d56156d986','hex');
-    const stackPk = Buffer.from('88f37cfbaed8c0c515c62a17a3a1ce2f397d08bbf20dcc788b69f11b5a5c9791','hex');
     var nonce = 1;
 
     config({
@@ -89,7 +86,7 @@ contract("Testing valid transactions made by Recipient Address ", function () {
                 }, done);
                 allAccounts = accounts;
                 userAddress = accounts[0];
-                stackAddress = accounts[1];
+                recipientAddress = accounts[1];
                 signerAddress = accounts[2];
             });
         });
@@ -113,7 +110,7 @@ contract("Testing valid transactions made by Recipient Address ", function () {
             const returnToken = false;
             const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.options.address,signersPk);
 
-            await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:stackAddress});
+            await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:recipientAddress});
             const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];
@@ -130,7 +127,7 @@ contract("Testing valid transactions made by Recipient Address ", function () {
             const returnToken = false;
             const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
 
-            await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:stackAddress});
+            await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:recipientAddress});
             const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];
@@ -182,7 +179,7 @@ contract("Testing valid transactions made by Recipient Address ", function () {
             const returnToken = false;
             const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
 
-            await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:stackAddress});
+            await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:recipientAddress});
             const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];
@@ -234,7 +231,7 @@ contract("Testing valid transactions made by Recipient Address ", function () {
             const returnToken = false;
             const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.options.address,signersPk);
 
-            await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:stackAddress});
+            await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:recipientAddress});
             const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];
@@ -251,7 +248,7 @@ contract("Testing valid transactions made by Recipient Address ", function () {
             const returnToken = false;
             const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
 
-            await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:stackAddress});
+            await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:recipientAddress});
             const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];
@@ -302,7 +299,7 @@ contract("Testing valid transactions made by Recipient Address ", function () {
             const returnToken = false;
             const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.options.address,signersPk);
 
-            await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:stackAddress});
+            await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:recipientAddress});
             const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];

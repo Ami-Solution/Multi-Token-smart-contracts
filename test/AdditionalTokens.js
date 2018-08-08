@@ -14,12 +14,10 @@ contract("Testing Additional Tokens", function () {
     this.timeout(0);
     let allAccounts;
     let userAddress;
-    let stackAddress;
+    let recipientAddress;
     const timeout = 10;
     const initialCreation = 1000000000;
     const signersPk = Buffer.from('f4ebc8adae40bfc741b0982c206061878bffed3ad1f34d67c94fa32c3d33eac8', 'hex');
-    const userPk = Buffer.from('f942d5d524ec07158df4354402bfba8d928c99d0ab34d0799a6158d56156d986','hex');
-    const stackPk = Buffer.from('88f37cfbaed8c0c515c62a17a3a1ce2f397d08bbf20dcc788b69f11b5a5c9791','hex');
     var nonce = 1;
 
     config({
@@ -97,7 +95,7 @@ contract("Testing Additional Tokens", function () {
                 }, done);
                 allAccounts = accounts;
                 userAddress = accounts[0];
-                stackAddress = accounts[1];
+                recipientAddress = accounts[1];
             });
         });
 
@@ -105,7 +103,7 @@ contract("Testing Additional Tokens", function () {
         {
             try
             {
-                await STKChannel.methods.addChannel(WETHToken.options.address,userAddress,stackAddress,10).send({from:address[5]})
+                await STKChannel.methods.addChannel(WETHToken.options.address,userAddress,recipientAddress,10).send({from:address[5]})
                 assert.fail("Non channel participant should never be able to add tokens");
             }
             catch (error)
@@ -118,7 +116,7 @@ contract("Testing Additional Tokens", function () {
         {
             try
             {
-                await STKChannel.methods.addChannel(WETHToken.options.address,userAddress,stackAddress,10).send({from:userAddress})
+                await STKChannel.methods.addChannel(WETHToken.options.address,userAddress,recipientAddress,10).send({from:userAddress})
                 assert.fail("User should never be able to add tokens");
             }
             catch (error)
@@ -129,7 +127,7 @@ contract("Testing Additional Tokens", function () {
 
         it ("Recipient Address should be able to add tokens", async() =>
         {
-            await STKChannel.methods.addChannel(WETHToken.options.address,userAddress,stackAddress,10).send({from:stackAddress});
+            await STKChannel.methods.addChannel(WETHToken.options.address,userAddress,recipientAddress,10).send({from:recipientAddress});
             assert("Recipient Address should be able to add tokens");
 
         })
@@ -138,7 +136,7 @@ contract("Testing Additional Tokens", function () {
         {
             try
             {
-                await STKChannel.methods.addChannel(ThingToken.options.address,userAddress,stackAddress,10).send({from:userAddress})
+                await STKChannel.methods.addChannel(ThingToken.options.address,userAddress,recipientAddress,10).send({from:userAddress})
                 assert.fail("User should never be able to add duplicate tokens");
             }
             catch (error)
@@ -151,7 +149,7 @@ contract("Testing Additional Tokens", function () {
         {
             try
             {
-                await STKChannel.methods.addChannel(ThingToken.options.address,userAddress,stackAddress,10).send({from:stackAddress})
+                await STKChannel.methods.addChannel(ThingToken.options.address,userAddress,recipientAddress,10).send({from:recipientAddress})
                 assert.fail("Recipient Address should never be able to add duplicate tokens");
             }
             catch (error)
@@ -188,7 +186,7 @@ contract("Testing Additional Tokens", function () {
 
             try
             {
-                await STKChannel.methods.close(ThingToken.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:stackAddress});
+                await STKChannel.methods.close(ThingToken.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:recipientAddress});
                 assert.fail("User cannot close with amount greater than escrow");
             }
             catch (error)
@@ -222,7 +220,7 @@ contract("Testing Additional Tokens", function () {
 
             try
             {
-                await STKChannel.methods.settle(ThingToken.options.address).send({from:stackAddress});
+                await STKChannel.methods.settle(ThingToken.options.address).send({from:recipientAddress});
                 assert.fail("Recipient Address cannot settle an uninitialized channel");
             }
             catch (error)
