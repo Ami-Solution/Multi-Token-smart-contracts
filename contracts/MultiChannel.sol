@@ -109,12 +109,11 @@ contract MultiChannel
         uint _amount,
         uint8 _v,
         bytes32 _r,
-        bytes32 _s, 
-        bool _returnToken)
+        bytes32 _s)
         external
         channelExists(_addressOfToken)
     {
-        channels[_addressOfToken].updateClosedChannel(address(this), _addressOfToken, _nonce, _amount, _v, _r, _s, _returnToken);
+        channels[_addressOfToken].updateClosedChannel(address(this), _addressOfToken, _nonce, _amount, _v, _r, _s);
         emit LogChannelContested(_amount, msg.sender);
     }
 

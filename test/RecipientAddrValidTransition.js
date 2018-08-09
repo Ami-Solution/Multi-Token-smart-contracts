@@ -131,7 +131,7 @@ contract("Testing Valid Transactions by Recipient", function () {
             const returnToken = false;
             const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
 
-            await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:recipientAddress});
+            await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:recipientAddress});
             const data  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];
@@ -252,7 +252,7 @@ contract("Testing Valid Transactions by Recipient", function () {
             const returnToken = false;
             const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
 
-            await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:recipientAddress});
+            await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:recipientAddress});
             const data  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];

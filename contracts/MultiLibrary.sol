@@ -28,7 +28,12 @@ library MultiLibrary
         require(data.closedBlock_ > 0);
         _;
     }
-
+    modifier inContestPeriod(MultiChannelData storage data) 
+    { 
+        require(data.closedBlock_ + data.timeout_ >= block.number);
+        _; 
+    } 
+    
     modifier timeoutOver(MultiChannelData storage data)
     {
         require(data.closedBlock_ + data.timeout_ < block.number);
@@ -118,19 +123,17 @@ library MultiLibrary
         uint _amount,
         uint8 _v,
         bytes32 _r,
-        bytes32 _s,
-        bool _returnToken)
+        bytes32 _s)
         public
         callerIsChannelParticipant(data)
         channelAlreadyClosed(data)
         isSufficientBalance(data, _amount, _channelAddress)
+        inContestPeriod(data)
     {
         address signerAddress = recoverAddressFromHashAndParameters(_addressOfToken, _nonce,_amount,_r,_s,_v);
-        require(signerAddress == data.signerAddress_);
+        require((signerAddress == data.signerAddress_ && data.recipientAddress_  == msg.sender) || (signerAddress == data.recipientAddress_  && data.userAddress_==msg.sender));
         require(data.closedNonce_ < _nonce);
         data.closedNonce_ = _nonce;
-        //update the amount
-        data.shouldReturn_ = _returnToken; 
         data.amountOwed_ = _amount;
     }
 
