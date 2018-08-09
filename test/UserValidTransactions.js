@@ -1,15 +1,13 @@
-/*global contract, config, it, assert, web3*/
-const STKChannel = require('Embark/contracts/STKChannel');
+
+const MultiChannel = require('Embark/contracts/MultiChannel');
 const ERC20Token = require('Embark/contracts/ERC20Token');
-const STKLibrary = require('Embark/contracts/STKLibrary');
+const MultiLibrary = require('Embark/contracts/MultiLibrary');
 const indexes = require('./helpers/ChannelDataIndexes.js')
 const StandardToken = require('Embark/contracts/StandardToken.sol');
 const Token = require('Embark/contracts/Token.sol');
 const closingHelper = require('./helpers/channelClosingHelper');
 const assertRevert = require('./helpers/assertRevert');
 const testConstant = require('./helpers/testConstant');
-const port = 8545;
-
 
 contract("Testing Valid Transactions made by User", function () {
     this.timeout(0);
@@ -22,6 +20,7 @@ contract("Testing Valid Transactions made by User", function () {
     const userPk = Buffer.from(testConstant.USER_PK,'hex');
     const recipientAddressPk = Buffer.from(testConstant.RECIPIENT_PK,'hex');
     var nonce = 1;
+    const port = testConstant.PORT; 
 
     config({
         deployment: {
@@ -64,7 +63,7 @@ contract("Testing Valid Transactions made by User", function () {
                             args: [initialCreation,'STK', 18, 'STK'],
                             "fromIndex":3
                         },
-                        STKLibrary: {
+                        MultiLibrary: {
                             args: [
                                 '$ERC20Token',
                                 accounts[0],
@@ -77,7 +76,7 @@ contract("Testing Valid Transactions made by User", function () {
                             ],
                             "fromIndex":1
                         },
-                        "STKChannel": {
+                        "MultiChannel": {
                             args: [
                                 accounts[0],
                                 accounts[2],
@@ -95,15 +94,15 @@ contract("Testing Valid Transactions made by User", function () {
             });
         });
 
-        it("STK Channel balance should be 50 after transferring 50 tokens",async() =>
+        it("Multi Channel balance should be 50 after transferring 50 tokens",async() =>
         {
             const transfer = 50;
-            await ERC20Token.methods.approve(STKChannel.options.address,transfer).send({from: allAccounts[3]});
-            await ERC20Token.methods.transfer(STKChannel.options.address, transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.approve(MultiChannel.options.address,transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({from: allAccounts[3]});
             const initialCreatorBalance = await ERC20Token.methods.balanceOf(allAccounts[3]).call();
-            const stkchannelBalance = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
+            const stkchannelBalance = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
 
-            assert.equal(stkchannelBalance.valueOf(), transfer, "STKChannel should have 50 tokens after transfer but does not");
+            assert.equal(stkchannelBalance.valueOf(), transfer, "MultiChannel should have 50 tokens after transfer but does not");
             assert.equal(initialCreatorBalance.valueOf(), (initialCreation-transfer).valueOf(), "Initial creator should have transferred amount of tokens removed from account");
         })
 
@@ -112,10 +111,10 @@ contract("Testing Valid Transactions made by User", function () {
             nonce++;
             const amount = 49;
             const returnToken = false;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.options.address,recipientAddressPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.options.address,recipientAddressPk);
 
-            await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
-            const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
+            const data  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];
             const closedBlock = data[indexes.CLOSED_BLOCK];
@@ -129,10 +128,10 @@ contract("Testing Valid Transactions made by User", function () {
             nonce++;
             const amount = 50;
             const returnToken = false;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
 
-            await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
-            const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
+            const data  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];
             const closedBlock = data[indexes.CLOSED_BLOCK];
@@ -150,18 +149,18 @@ contract("Testing Valid Transactions made by User", function () {
             }
 
             const oldUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
-            const depositedTokens = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
-            const dataBefore  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            const depositedTokens = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
+            const dataBefore  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
             const oldStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
             const amountOwed = dataBefore[indexes.AMOUNT_OWED];
-            const oldChannelBalance = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
+            const oldChannelBalance = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
 
-            await STKChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
-            const dataAfter  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            await MultiChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
+            const dataAfter  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const newUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
             const newStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
-            const newChannelBalance = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
+            const newChannelBalance = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
 
 
             assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf())>0,"Amount owed before settling should be greater than 0");
@@ -175,16 +174,16 @@ contract("Testing Valid Transactions made by User", function () {
         it("User should be allowed to close the channel with a valid signature less than amount deposited", async() =>
         {
             const transfer = 50;
-            await ERC20Token.methods.approve(STKChannel.options.address,transfer).send({from: allAccounts[3]});
-            await ERC20Token.methods.transfer(STKChannel.options.address, transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.approve(MultiChannel.options.address,transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({from: allAccounts[3]});
             nonce++;
             const amount = 20;
 
             const returnToken = false;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,recipientAddressPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,recipientAddressPk);
 
-            await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
-            const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
+            const data  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];
             const closedBlock = data[indexes.CLOSED_BLOCK];
@@ -202,18 +201,18 @@ contract("Testing Valid Transactions made by User", function () {
             }
 
             const oldUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
-            const depositedTokens = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
-            const dataBefore  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            const depositedTokens = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
+            const dataBefore  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
             const oldStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
             const amountOwed = dataBefore[indexes.AMOUNT_OWED];
-            const oldChannelBalance = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
+            const oldChannelBalance = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
 
-            await STKChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
-            const dataAfter  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            await MultiChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
+            const dataAfter  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const newUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
             const newStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
-            const newChannelBalance = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
+            const newChannelBalance = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
 
 
             assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf())>0,"Amount owed before settling should be greater than 0");
@@ -228,15 +227,15 @@ contract("Testing Valid Transactions made by User", function () {
         it("User can close a channel with just under deposited", async() =>
         {
             const transfer = 50;
-            await ERC20Token.methods.approve(STKChannel.options.address,transfer).send({from: allAccounts[3]});
-            await ERC20Token.methods.transfer(STKChannel.options.address, transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.approve(MultiChannel.options.address,transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({from: allAccounts[3]});
             nonce++;
             const amount = 49;
             const returnToken = false;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.options.address,recipientAddressPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.options.address,recipientAddressPk);
 
-            await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
-            const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
+            const data  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];
             const closedBlock = data[indexes.CLOSED_BLOCK];
@@ -250,10 +249,10 @@ contract("Testing Valid Transactions made by User", function () {
             nonce++;
             const amount = 50;
             const returnToken = false;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
 
-            await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
-            const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
+            const data  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];
             const closedBlock = data[indexes.CLOSED_BLOCK];
@@ -271,18 +270,18 @@ contract("Testing Valid Transactions made by User", function () {
             }
 
             const oldUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
-            const depositedTokens = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
-            const dataBefore  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            const depositedTokens = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
+            const dataBefore  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
             const oldStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
             const amountOwed = dataBefore[indexes.AMOUNT_OWED];
-            const oldChannelBalance = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
+            const oldChannelBalance = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
 
-            await STKChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
-            const dataAfter  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            await MultiChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
+            const dataAfter  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const newUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
             const newStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
-            const newChannelBalance = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
+            const newChannelBalance = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
 
 
             assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf())>0,"Amount owed before settling should be greater than 0");
@@ -296,15 +295,15 @@ contract("Testing Valid Transactions made by User", function () {
         it ("User can close channel with amount just under deposited", async () =>
         {
             const transfer = 50;
-            await ERC20Token.methods.approve(STKChannel.options.address,transfer).send({from: allAccounts[3]});
-            await ERC20Token.methods.transfer(STKChannel.options.address, transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.approve(MultiChannel.options.address,transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({from: allAccounts[3]});
             nonce++;
             const amount = 49;
             const returnToken = true;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.options.address,recipientAddressPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.options.address,recipientAddressPk);
 
-            await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
-            const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
+            const data  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];
             const closedBlock = data[indexes.CLOSED_BLOCK];
@@ -320,15 +319,15 @@ contract("Testing Valid Transactions made by User", function () {
                 var transaction = {from:allAccounts[7],to:allAccounts[8],gasPrice:1000000000,value:2};
                 web3.eth.sendTransaction(transaction);
             }            
-            const dataBefore  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            const dataBefore  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
-            const depositedTokens = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
+            const depositedTokens = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
             const oldStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
             const oldUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
             const amountOwed = dataBefore[indexes.AMOUNT_OWED];
             
-            await STKChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
-            const dataAfter  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            await MultiChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
+            const dataAfter  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
             
             const newUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
             const newStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
@@ -345,11 +344,11 @@ contract("Testing Valid Transactions made by User", function () {
         it("User can close without signature if no IOUs exist", async() =>
         {
             const transfer = 50;
-            await ERC20Token.methods.approve(STKChannel.options.address,transfer).send({from: allAccounts[3]});
-            await ERC20Token.methods.transfer(STKChannel.options.address, transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.approve(MultiChannel.options.address,transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({from: allAccounts[3]});
 
-            await STKChannel.methods.closeWithoutSignature(ERC20Token.options.address).send({from:userAddress});
-            const data  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            await MultiChannel.methods.closeWithoutSignature(ERC20Token.options.address).send({from:userAddress});
+            const data  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             assert.strictEqual(data[indexes.SHOULD_RETURN],true,"Close without signature should set retunToken to true");
             assert(data[indexes.CLOSED_BLOCK]>0, "closed block should be greater than 0");
@@ -362,15 +361,15 @@ contract("Testing Valid Transactions made by User", function () {
                 var transaction = {from:allAccounts[7],to:allAccounts[8],gasPrice:1000000000,value:2};
                 web3.eth.sendTransaction(transaction);
             }            
-            const dataBefore  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            const dataBefore  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
-            const depositedTokens = await ERC20Token.methods.balanceOf(STKChannel.options.address).call();
+            const depositedTokens = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
             const oldStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
             const oldUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
             const amountOwed = dataBefore[indexes.AMOUNT_OWED];
             
-            await STKChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
-            const dataAfter  = await STKChannel.methods.getChannelData(ERC20Token.options.address).call();
+            await MultiChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
+            const dataAfter  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
             
             const newUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
             const newStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
@@ -382,5 +381,4 @@ contract("Testing Valid Transactions made by User", function () {
             assert.equal(parseInt(newStackBalance.valueOf()), parseInt(oldStackBalance.valueOf()) + parseInt(amountOwed.valueOf()), 'The recipientAddress account value should be credited');
             assert.equal(parseInt(newUserBalance.valueOf()),parseInt(oldUserBalance.valueOf()) + parseInt(depositedTokens.valueOf()) - parseInt(amountOwed.valueOf()),'The User address should get back the unused tokens');
         });
-
     });

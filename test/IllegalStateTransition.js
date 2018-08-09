@@ -1,16 +1,15 @@
-/*global contract, config, it, assert, web3*/
-const STKChannel = require('Embark/contracts/STKChannel');
+
+const MultiChannel = require('Embark/contracts/MultiChannel');
 const ERC20Token = require('Embark/contracts/ERC20Token');
-const STKLibrary = require('Embark/contracts/STKLibrary');
+const MultiLibrary = require('Embark/contracts/MultiLibrary');
 const indexes = require('./helpers/ChannelDataIndexes.js')
 const StandardToken = require('Embark/contracts/StandardToken.sol');
 const Token = require('Embark/contracts/Token.sol');
 const closingHelper = require('./helpers/channelClosingHelper');
-const testConstant = require('./helpers/testConstant');
 const assertRevert = require('./helpers/assertRevert');
-const port = 8545;
+const testConstant = require('./helpers/testConstant');
 
-contract("Testing Illegal State Transitions", function () {
+contract("Testing Invalid Transactions", function () {
     this.timeout(0);
     let allAccounts;
     let userAddress;
@@ -21,6 +20,7 @@ contract("Testing Illegal State Transitions", function () {
     const userPk = Buffer.from(testConstant.USER_PK,'hex');
     const recipientPk = Buffer.from(testConstant.RECIPIENT_PK,'hex');
     var nonce = 1;
+    const port = testConstant.PORT; 
 
     config({
         deployment: {
@@ -41,14 +41,6 @@ contract("Testing Illegal State Transitions", function () {
                     "port": port,
                     "type": "rpc",
                     "accounts": [
-                        // {
-                        //     "privateKeyFile": "test/helpers/privateKeys.js" // You can put more than one key, separated by , or ;
-                        // },
-                        // {
-                        //     "mnemonic": "example exile argue silk regular smile grass bomb merge arm assist farm",
-                        //     "addressIndex": "0", // Optional. The index to start getting the address
-                        //     "numAddresses": "10", // Optional. The number of addresses to get
-                        // }
                     ]},
                     contracts: {
                         "Token": {
@@ -62,11 +54,16 @@ contract("Testing Illegal State Transitions", function () {
                             "instanceOf": "ERC20Token",
                             "fromIndex":3
                         },
+                        "ThingToken": {
+                            args:[initialCreation, "Thing", 18, "THG"],
+                            "instanceOf": "ERC20Token",
+                            "fromIndex":3
+                        },
                         "ERC20Token": {
                             args: [initialCreation,'STK', 18, 'STK'],
                             "fromIndex":3
                         },
-                        STKLibrary: {
+                        MultiLibrary: {
                             args: [
                                 '$ERC20Token',
                                 accounts[0],
@@ -79,7 +76,7 @@ contract("Testing Illegal State Transitions", function () {
                             ],
                             "fromIndex":1
                         },
-                        "STKChannel": {
+                        "MultiChannel": {
                             args: [
                                 accounts[0],
                                 accounts[2],
@@ -93,20 +90,22 @@ contract("Testing Illegal State Transitions", function () {
                 allAccounts = accounts;
                 userAddress = accounts[0];
                 recipientAddress = accounts[1];
+                signerAddress = accounts[2];
             });
         });
+
 
         it ("User should not be able to update an open channel", async() =>
         {
             const transfer = 50;
-            await ERC20Token.methods.approve(STKChannel.options.address,transfer).send({from: allAccounts[3]});
-            await ERC20Token.methods.transfer(STKChannel.options.address, transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.approve(MultiChannel.options.address,transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({from: allAccounts[3]});
 
             amount = 1;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
             try
             {
-                await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
                 assert.fail("User should never be able to contest an open channel");
             }
             catch (error)
@@ -118,10 +117,10 @@ contract("Testing Illegal State Transitions", function () {
         it ("Recipient Address should not be able to update an open channel", async() =>
         {
             amount = 1;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
             try
             {
-                await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:recipientAddress});
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:recipientAddress});
                 assert.fail("Recipient Address should never be able to contest an open channel");
             }
             catch (error)
@@ -134,7 +133,7 @@ contract("Testing Illegal State Transitions", function () {
         {
             try
             {
-                await STKChannel.methods.settle(ERC20Token.options.address).send({from:userAddress});
+                await MultiChannel.methods.settle(ERC20Token.options.address).send({from:userAddress});
                 assert.fail("User should never be able to settle an open channel");
             }
             catch (error)
@@ -147,7 +146,7 @@ contract("Testing Illegal State Transitions", function () {
         {
             try
             {
-                await STKChannel.methods.settle(ERC20Token.options.address).send({from:recipientAddress});
+                await MultiChannel.methods.settle(ERC20Token.options.address).send({from:recipientAddress});
                 assert.fail("Recipient Address should never be able to settle an open channel");
             }
             catch (error)
@@ -160,11 +159,11 @@ contract("Testing Illegal State Transitions", function () {
         {
             const amount = 150;
 
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
 
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
+                await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
                 assert.fail("User cannot close with amount greater than escrow");
             }
             catch (error)
@@ -178,11 +177,11 @@ contract("Testing Illegal State Transitions", function () {
             nonce++; 
             const amount = 2;
 
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
 
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
+                await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
                 assert.fail("User cannot close with amount greater than escrow");
             }
             catch (error)
@@ -195,11 +194,11 @@ contract("Testing Illegal State Transitions", function () {
         {
             const amount = 150;
 
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
 
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:recipientAddress});
+                await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:recipientAddress});
                 assert.fail("Recipient Address cannot close with amount greater than escrow");
             }
             catch (error)
@@ -210,11 +209,11 @@ contract("Testing Illegal State Transitions", function () {
 
         it("User cannot close channel with self-signed signature", async() =>
         {
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,userPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,userPk);
 
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
+                await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
                 assert.fail("User cannot sign with self-signed signature");
             }
             catch (error)
@@ -225,11 +224,11 @@ contract("Testing Illegal State Transitions", function () {
 
         it("Recipient Address cannot close channel with self-signed signature", async() =>
         {
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,recipientPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,recipientPk);
 
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:recipientAddress});
+                await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:recipientAddress});
                 assert.fail("Recipient Address cannot sign with self-signed signature");
             }
             catch (error)
@@ -243,14 +242,14 @@ contract("Testing Illegal State Transitions", function () {
             nonce++;
             const amount = 2;
 
-            const properClose = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
-            await STKChannel.methods.close(ERC20Token.options.address,nonce,amount,properClose.v,properClose.r,properClose.s,true).send({from:allAccounts[1]});
+            const properClose = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
+            await MultiChannel.methods.close(ERC20Token.options.address,nonce,amount,properClose.v,properClose.r,properClose.s,true).send({from:allAccounts[1]});
 
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
 
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
+                await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
                 assert.fail("User should not use the same nonce for contest");
             }
             catch (error)
@@ -261,11 +260,11 @@ contract("Testing Illegal State Transitions", function () {
 
         it("Recipient Address cannot use the same nonce for contesting channel", async() =>
         {
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
 
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:recipientAddress});
+                await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:recipientAddress});
                 assert.fail("Recipient Address should not use the same nonce for contest");
             }
             catch (error)
@@ -276,11 +275,11 @@ contract("Testing Illegal State Transitions", function () {
 
         it("User cannot close a closed channel", async() =>
         {
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
 
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
+                await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
                 assert.fail("User cannot close a closed channel");
             }
             catch (error)
@@ -293,7 +292,7 @@ contract("Testing Illegal State Transitions", function () {
         {
             try
             {
-                await STKChannel.methods.closeWithoutSignature().send({from:recipientAddress}); 
+                await MultiChannel.methods.closeWithoutSignature().send({from:recipientAddress}); 
                 assert.fail("Recipient Address should not be able to close without sig on an already closed channel");
             }
             catch (error)
@@ -306,7 +305,7 @@ contract("Testing Illegal State Transitions", function () {
         {
             try
             {
-                await STKChannel.methods.closeWithoutSignature().send({from:userAddress}); 
+                await MultiChannel.methods.closeWithoutSignature().send({from:userAddress}); 
                 assert.fail("User should not be able to close without sig on an already closed channel");
             }
             catch (error)
@@ -319,7 +318,7 @@ contract("Testing Illegal State Transitions", function () {
         {
             try
             {
-                await STKChannel.methods.closeWithoutSignature().send({from:recipientAddress}); 
+                await MultiChannel.methods.closeWithoutSignature().send({from:recipientAddress}); 
                 assert.fail("Recipient Address should not be able to close without sig on an already closed channel");
             }
             catch (error)
@@ -330,11 +329,11 @@ contract("Testing Illegal State Transitions", function () {
         it("User should not contest an amount greater than deposited", async() =>
         {
             amount = 10000;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
 
             try
             {
-                await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
                 assert.fail("User should not be able to update a closed channel with an amount greater than what's placed in escrow");
             }
             catch (error)
@@ -346,11 +345,11 @@ contract("Testing Illegal State Transitions", function () {
         it("Recipient Address should not be able to contest an amount greater than deposited", async() =>
         {
             amount = 10000;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
 
             try
             {
-                await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:recipientAddress});
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:recipientAddress});
                 assert.fail("Recipient Address should not be able to update a closed channel with an amount greater than what's placed in escrow");
             }
             catch (error)
@@ -363,7 +362,7 @@ contract("Testing Illegal State Transitions", function () {
         {
             try
             {
-                await STKChannel.methods.settle(ERC20Token.options.address).send({from:userAddress});
+                await MultiChannel.methods.settle(ERC20Token.options.address).send({from:userAddress});
                 assert.fail("User should never be able to settle before contest period is over")
             }
             catch (error)
@@ -376,7 +375,7 @@ contract("Testing Illegal State Transitions", function () {
         {
             try
             {
-                await STKChannel.methods.settle(ERC20Token.options.address).send({from:recipientAddress});
+                await MultiChannel.methods.settle(ERC20Token.options.address).send({from:recipientAddress});
                 assert.fail("Recipient Address should never be able to settle before contest period is over")
             }
             catch (error)

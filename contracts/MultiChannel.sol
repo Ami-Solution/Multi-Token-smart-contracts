@@ -1,16 +1,16 @@
 pragma solidity ^0.4.23;
 
 
-import "./STKLibrary.sol";
+import "./MultiLibrary.sol";
 
 
 /**
 Payment Channel between two parties that allows multiple deposits.
 Once closed, there is a contest period which allows state updates.
 */
-contract STKChannel
+contract MultiChannel
 {
-    using STKLibrary for STKLibrary.STKChannelData;
+    using MultiLibrary for MultiLibrary.MultiChannelData;
 
     modifier channelExists(address addressOfToken) 
     { 
@@ -28,7 +28,7 @@ contract STKChannel
      * Storage variables
      */
 
-    mapping (address => STKLibrary.STKChannelData) channels;
+    mapping (address => MultiLibrary.MultiChannelData) channels;
     address recipientAddress = msg.sender;
     event LogChannelOpened(address from, address to, uint blockNumber);
     event LogChannelClosed(uint blockNumber, address closer, uint amount);
@@ -138,7 +138,7 @@ contract STKChannel
     }
 
     function getChannelData(address _addressOfToken) view public returns (address, address, address, uint, uint, uint, uint, bool) {
-        STKLibrary.STKChannelData channel = channels[_addressOfToken];
+        MultiLibrary.MultiChannelData channel = channels[_addressOfToken];
         return (channel.userAddress_,
         channel.signerAddress_,
         channel.recipientAddress_,

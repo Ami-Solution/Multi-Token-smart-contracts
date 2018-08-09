@@ -1,15 +1,13 @@
 /*global contract, config, it, assert, web3*/
-const STKChannel = require('Embark/contracts/STKChannel');
+const MultiChannel = require('Embark/contracts/MultiChannel');
 const ERC20Token = require('Embark/contracts/ERC20Token');
-const STKLibrary = require('Embark/contracts/STKLibrary');
+const MultiLibrary = require('Embark/contracts/MultiLibrary');
 const indexes = require('./helpers/ChannelDataIndexes.js')
 const StandardToken = require('Embark/contracts/StandardToken.sol');
 const Token = require('Embark/contracts/Token.sol');
 const closingHelper = require('./helpers/channelClosingHelper');
 const testConstant = require('./helpers/testConstant');
 const assertRevert = require('./helpers/assertRevert');
-const port = 8545;
-
 
 contract("Testing Non Channel Participants", function () {
     this.timeout(0);
@@ -19,6 +17,7 @@ contract("Testing Non Channel Participants", function () {
     const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
     const nonParticipant = Buffer.from(testConstant.NON_PARTICIPANT,'hex');
     var nonce = 1;
+    const port = testConstant.PORT;     
     
     config({
         deployment: {
@@ -64,7 +63,7 @@ contract("Testing Non Channel Participants", function () {
                             args: [initialCreation,'STK', 18, 'STK'],
                             "fromIndex":3
                         },
-                        STKLibrary: {
+                        MultiLibrary: {
                             args: [
                                 '$ERC20Token',
                                 accounts[0],
@@ -77,7 +76,7 @@ contract("Testing Non Channel Participants", function () {
                             ],
                             "fromIndex":1
                         },
-                        "STKChannel": {
+                        "MultiChannel": {
                             args: [
                                 accounts[0],
                                 accounts[2],
@@ -95,15 +94,15 @@ contract("Testing Non Channel Participants", function () {
         it("Cannot close a channel with valid signature",async() =>
         {
             const transfer = 50;
-            await ERC20Token.methods.approve(STKChannel.options.address,transfer).send({from: allAccounts[3]});
-            await ERC20Token.methods.transfer(STKChannel.options.address, transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.approve(MultiChannel.options.address,transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({from: allAccounts[3]});
             
             const amount = 5;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, STKChannel.options.address, signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, signersPk);
             
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:accounts[5]});
+                await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:accounts[5]});
                 assert.fail("Non channel participant should not be able to close an open channel with a valid signature");
             }
             catch (error)
@@ -117,7 +116,7 @@ contract("Testing Non Channel Participants", function () {
         { 
             try 
             {
-                await STKChannel.methods.closeWithoutSignature(ERC20Token.options.address).send({from:accounts[3]}); 
+                await MultiChannel.methods.closeWithoutSignature(ERC20Token.options.address).send({from:accounts[3]}); 
                 assert.fail("Cannot close without signature"); 
             } 
             catch (error) 
@@ -130,16 +129,16 @@ contract("Testing Non Channel Participants", function () {
         it("Cannot close a channel with an invalid signature",async() =>
         {
             const transfer = 50;
-            await ERC20Token.methods.approve(STKChannel.options.address,transfer).send({from: allAccounts[3]});
-            await ERC20Token.methods.transfer(STKChannel.options.address, transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.approve(MultiChannel.options.address,transfer).send({from: allAccounts[3]});
+            await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({from: allAccounts[3]});
             
             nonce++;
             const amount = 5;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, STKChannel.options.address, nonParticipant);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, nonParticipant);
             
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:accounts[5]});
+                await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:accounts[5]});
                 assert.fail("Self signed signature should be invalid");
             }
             catch (error)
@@ -154,14 +153,14 @@ contract("Testing Non Channel Participants", function () {
             nonce++;
             const amount = 2;
             
-            const properClose = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
-            await STKChannel.methods.close(ERC20Token.options.address,nonce,amount,properClose.v,properClose.r,properClose.s,true).send({from:allAccounts[1]});
+            const properClose = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
+            await MultiChannel.methods.close(ERC20Token.options.address,nonce,amount,properClose.v,properClose.r,properClose.s,true).send({from:allAccounts[1]});
             
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
             
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
+                await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
                 assert.fail("Proper signed signature should not be able to close an already closed channel");
             }
             catch (error)
@@ -174,7 +173,7 @@ contract("Testing Non Channel Participants", function () {
         { 
             try 
             {
-                await STKChannel.methods.closeWithoutSignature(ERC20Token.options.address).send({from:accounts[3]}); 
+                await MultiChannel.methods.closeWithoutSignature(ERC20Token.options.address).send({from:accounts[3]}); 
                 assert.fail("Cannot close an already closed channel without signature"); 
             } 
             catch (error) 
@@ -188,7 +187,7 @@ contract("Testing Non Channel Participants", function () {
         {
             try 
             {
-                await STKChannel.methods.closeWithoutSignature(ERC20Token.options.address).send({from:accounts[3]}); 
+                await MultiChannel.methods.closeWithoutSignature(ERC20Token.options.address).send({from:accounts[3]}); 
                 assert.fail("Cannot close without signature"); 
             } 
             catch (error) 
@@ -202,11 +201,11 @@ contract("Testing Non Channel Participants", function () {
         {
             nonce++;
             const amount = 2;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, STKChannel.options.address, signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, signersPk);
             
             try
             {
-                await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:accounts[5]});
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:accounts[5]});
                 assert.fail("Non channel participant should not be able to change the state of an open channel");
             }
             catch (error)
@@ -220,11 +219,11 @@ contract("Testing Non Channel Participants", function () {
         {
             nonce++;
             const amount = 2;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, STKChannel.options.address, nonParticipant);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, nonParticipant);
             
             try
             {
-                await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:accounts[5]});
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:accounts[5]});
                 assert.fail("Non channel participant should not be able to change the state of an open channel");
             }
             catch (error)
@@ -241,7 +240,7 @@ contract("Testing Non Channel Participants", function () {
             
             try
             {
-                await STKChannel.methods.settle(ERC20Token.options.address).send({from:accounts[5]});
+                await MultiChannel.methods.settle(ERC20Token.options.address).send({from:accounts[5]});
                 assert.fail("Non channel participant should not be able to change the state of an open channel");
             }
             catch (error)
@@ -256,11 +255,11 @@ contract("Testing Non Channel Participants", function () {
             nonce++;
             const amount = 2;
             
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
             
             try
             {
-                await STKChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
+                await MultiChannel.methods.close(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
                 assert.fail("Improperly signed signature should not be able to close an already closed channel");
             }
             catch (error)
@@ -274,11 +273,11 @@ contract("Testing Non Channel Participants", function () {
             nonce++;
             const amount = 2;
             
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
             
             try
             {
-                await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
                 assert.fail("Non channel participant should not be able to contest channel with valid signature");
             }
             catch (error)
@@ -292,11 +291,11 @@ contract("Testing Non Channel Participants", function () {
             nonce++;
             const amount = 2;
             
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
             
             try
             {
-                await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
                 assert.fail("Should not be able to contest channel with invalid signature");
             }
             catch (error)
@@ -310,11 +309,11 @@ contract("Testing Non Channel Participants", function () {
             nonce++;
             const amount = 2;
             
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,STKChannel.address,nonParticipant);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,nonParticipant);
             
             try
             {
-                await STKChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
                 assert.fail("Non channel participant should not be able to contest");
             }
             catch (error)
@@ -327,7 +326,7 @@ contract("Testing Non Channel Participants", function () {
         {   
             try
             {
-                await STKChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[5]});
+                await MultiChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[5]});
                 assert.fail("Non channel participant cannot change state of channel");
             }
             catch (error)

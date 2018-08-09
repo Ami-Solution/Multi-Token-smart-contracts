@@ -5,4 +5,5 @@ deployedAddress.json
 .DS_Store
 bin/
 .embark/* 
-chains.json
+chains.json  
+test/helpers/testConstant.js
