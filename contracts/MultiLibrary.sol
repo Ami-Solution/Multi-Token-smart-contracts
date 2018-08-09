@@ -61,11 +61,14 @@ library MultiLibrary
     /**
     * @notice Function to close the payment channel.
     * @param data The channel specific data to work on.
+    * @param _channelAddress The address of the respective multitoken channel. 
+    * @param _addressOfToken The address of the token. 
     * @param _nonce The nonce of the deposit. Used for avoiding replay attacks.
     * @param _amount The amount of tokens claimed to be due to the receiver.
     * @param _v Cryptographic param v derived from the signature.
     * @param _r Cryptographic param r derived from the signature.
     * @param _s Cryptographic param s derived from the signature.
+    * @param _returnToken Determines to/to not return funds to user after settle. 
     */
     function close(
         MultiChannelData storage data,
@@ -109,6 +112,7 @@ library MultiLibrary
     /**
     * @notice Function to contest the closing state of the payment channel. Will be able to be called for a time period (in blocks) given by timeout after closing of the channel.
     * @param data The channel specific data to work on.
+    * @param _addressOfToken The address of the token. 
     * @param _nonce The nonce of the deposit. Used for avoiding replay attacks.
     * @param _amount The amount of tokens claimed to be due to the receiver.
     * @param _v Cryptographic param v derived from the signature.
@@ -140,6 +144,7 @@ library MultiLibrary
     /**
     * @notice After the timeout of the channel after closing has passed, can be called by either participant to withdraw funds.
     * @param data The channel specific data to work on.
+    * @param _channelAddress The address of the multichannel to interact with. 
     */
     function settle(MultiChannelData storage data, address _channelAddress)
         public
@@ -169,8 +174,11 @@ library MultiLibrary
     }
 
     /**
-    * @notice Add new token
+    * @notice Adding new tokens to the respective channel
     * @param data The channel specific data to work on.
+    * @param _from The address of the user. After the settle, the funds will be returned here. 
+    * @param _addressOfSigner The addres of the signer. 
+    * @param _expiryNumberOfBlocks The timeout period for the given channel. 
     */
     function addChannel(MultiChannelData storage data, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
         public
@@ -183,13 +191,14 @@ library MultiLibrary
 
     /**
     * @notice After the timeout of the channel after closing has passed, can be called by either participant to withdraw funds.
+    * @param _addressOfToken The address of the token to hash. 
     * @param _nonce The nonce of the deposit. Used for avoiding replay attacks.
     * @param _amount The amount of tokens claimed to be due to the receiver.
     * @param r Cryptographic param v derived from the signature.
     * @param s Cryptographic param r derived from the signature.
     * @param v Cryptographic param s derived from the signature.
     */
-    function recoverAddressFromHashAndParameters(address _addressOfToken, uint _nonce,uint _amount,bytes32 r,bytes32 s,uint8 v)
+    function recoverAddressFromHashAndParameters(address _addressOfToken,uint _nonce,uint _amount,bytes32 r,bytes32 s,uint8 v)
         internal view
         returns (address)
     {
