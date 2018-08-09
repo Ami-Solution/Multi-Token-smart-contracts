@@ -1,7 +1,7 @@
 /*global contract, config, it, assert, web3*/
-const STKChannel = require('Embark/contracts/STKChannel');
+const MultiChannel = require('Embark/contracts/MultiChannel');
 const ERC20Token = require('Embark/contracts/ERC20Token');
-const STKLibrary = require('Embark/contracts/STKLibrary');
+const MultiLibrary = require('Embark/contracts/MultiLibrary');
 const indexes = require('./helpers/ChannelDataIndexes.js')
 const StandardToken = require('Embark/contracts/StandardToken.sol');
 const Token = require('Embark/contracts/Token.sol');
@@ -53,7 +53,7 @@ contract("Testing ERC20 Token", function () {
                             args: [initialCreation,'STK', 18, 'STK'],
                             "fromIndex":3
                         },
-                        STKLibrary: {
+                        MultiLibrary: {
                             args: [
                                 '$ERC20Token',
                                 accounts[0],
@@ -66,7 +66,7 @@ contract("Testing ERC20 Token", function () {
                             ],
                             "fromIndex":1
                         },
-                        "STKChannel": {
+                        "MultiChannel": {
                             args: [
                                 accounts[0],
                                 accounts[2],
@@ -92,7 +92,7 @@ contract("Testing ERC20 Token", function () {
         assert.equal(balance.valueOf(), 1000000000, '1 billion was not in the first account');
     });
     
-    it('STK Token should have symbol as STK',async()=> {
+    it('STK Token should have symbol as Multi',async()=> {
         const symbol = await ERC20Token.symbol.call();
         assert.equal(symbol,'STK','Symbol is not STK');
     });  

@@ -3,11 +3,11 @@ pragma solidity ^0.4.23;
 import "./ERC20Token.sol";
 import "./SafeMathLib.sol";
 
-library STKLibrary
+library MultiLibrary
 {
     using SafeMathLib for uint;
 
-    struct STKChannelData
+    struct MultiChannelData
     {
         ERC20Token token_;
         address userAddress_;
@@ -23,31 +23,31 @@ library STKLibrary
     event LogChannelSettled(uint blockNumber, uint finalBalance);
     event CloseTest(address addr);
 
-    modifier channelAlreadyClosed(STKChannelData storage data)
+    modifier channelAlreadyClosed(MultiChannelData storage data)
     {
         require(data.closedBlock_ > 0);
         _;
     }
 
-    modifier timeoutOver(STKChannelData storage data)
+    modifier timeoutOver(MultiChannelData storage data)
     {
         require(data.closedBlock_ + data.timeout_ < block.number);
         _;
     }
 
-    modifier channelIsOpen(STKChannelData storage data)
+    modifier channelIsOpen(MultiChannelData storage data)
     {
         require(data.closedBlock_ == 0);
         _;
     }
 
-    modifier callerIsChannelParticipant(STKChannelData storage data)
+    modifier callerIsChannelParticipant(MultiChannelData storage data)
     {
         require(msg.sender == data.recipientAddress_||msg.sender == data.userAddress_);
         _;
     }
 
-    modifier isSufficientBalance(STKChannelData storage data, uint amount, address channelAddress)
+    modifier isSufficientBalance(MultiChannelData storage data, uint amount, address channelAddress)
     {
         require(amount <= data.token_.balanceOf(channelAddress));
         _;
@@ -63,7 +63,7 @@ library STKLibrary
     * @param _s Cryptographic param s derived from the signature.
     */
     function close(
-        STKChannelData storage data,
+        MultiChannelData storage data,
         address _channelAddress,
         address _addressOfToken,
         uint _nonce,
@@ -92,7 +92,7 @@ library STKLibrary
     * @notice Function to close the payment channel without a signature.
     * @param data The channel specific data to work on.
     */
-    function closeWithoutSignature(STKChannelData storage data)
+    function closeWithoutSignature(MultiChannelData storage data)
         public
         channelIsOpen(data)
         callerIsChannelParticipant(data)
@@ -111,7 +111,7 @@ library STKLibrary
     * @param _s Cryptographic param s derived from the signature.
     */
     function updateClosedChannel(
-        STKChannelData storage data,
+        MultiChannelData storage data,
         address _channelAddress,
         address _addressOfToken,
         uint _nonce,
@@ -138,7 +138,7 @@ library STKLibrary
     * @notice After the timeout of the channel after closing has passed, can be called by either participant to withdraw funds.
     * @param data The channel specific data to work on.
     */
-    function settle(STKChannelData storage data, address _channelAddress)
+    function settle(MultiChannelData storage data, address _channelAddress)
         public
         channelAlreadyClosed(data)
         timeoutOver(data)
@@ -169,7 +169,7 @@ library STKLibrary
     * @notice Add new token
     * @param data The channel specific data to work on.
     */
-    function addChannel(STKChannelData storage data, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
+    function addChannel(MultiChannelData storage data, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
         public
     {
         data.userAddress_ = _from;
