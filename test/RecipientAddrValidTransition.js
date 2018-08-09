@@ -1,4 +1,4 @@
-/*global contract, config, it, assert, web3*/
+
 const MultiChannel = require('Embark/contracts/MultiChannel');
 const ERC20Token = require('Embark/contracts/ERC20Token');
 const MultiLibrary = require('Embark/contracts/MultiLibrary');
@@ -9,15 +9,18 @@ const closingHelper = require('./helpers/channelClosingHelper');
 const assertRevert = require('./helpers/assertRevert');
 const testConstant = require('./helpers/testConstant');
 
-contract("Testing valid transactions made by Recipient Address ", function () {
+contract("Testing Valid Transactions by Recipient", function () {
     this.timeout(0);
     let allAccounts;
+    let userAddress;
     let recipientAddress;
     const timeout = 10;
     const initialCreation = 1000000000;
     const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
+    const userPk = Buffer.from(testConstant.USER_PK,'hex');
+    const recipientPk = Buffer.from(testConstant.RECIPIENT_PK,'hex');
     var nonce = 1;
-    const port = testConstant.PORT;     
+    const port = testConstant.PORT; 
 
     config({
         deployment: {
@@ -90,6 +93,7 @@ contract("Testing valid transactions made by Recipient Address ", function () {
                 signerAddress = accounts[2];
             });
         });
+
 
         it("Multi Channel balance should be 50 after transferring 50 tokens",async() =>
         {

@@ -1,4 +1,4 @@
-/*global contract, config, it, assert, web3*/
+
 const MultiChannel = require('Embark/contracts/MultiChannel');
 const ERC20Token = require('Embark/contracts/ERC20Token');
 const MultiLibrary = require('Embark/contracts/MultiLibrary');
@@ -8,7 +8,6 @@ const Token = require('Embark/contracts/Token.sol');
 const closingHelper = require('./helpers/channelClosingHelper');
 const assertRevert = require('./helpers/assertRevert');
 const testConstant = require('./helpers/testConstant');
-
 
 contract("Testing Valid Transactions made by User", function () {
     this.timeout(0);
@@ -382,5 +381,4 @@ contract("Testing Valid Transactions made by User", function () {
             assert.equal(parseInt(newStackBalance.valueOf()), parseInt(oldStackBalance.valueOf()) + parseInt(amountOwed.valueOf()), 'The recipientAddress account value should be credited');
             assert.equal(parseInt(newUserBalance.valueOf()),parseInt(oldUserBalance.valueOf()) + parseInt(depositedTokens.valueOf()) - parseInt(amountOwed.valueOf()),'The User address should get back the unused tokens');
         });
-
     });

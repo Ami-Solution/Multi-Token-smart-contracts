@@ -1,4 +1,4 @@
-/*global contract, config, it, assert, web3*/
+
 const MultiChannel = require('Embark/contracts/MultiChannel');
 const ERC20Token = require('Embark/contracts/ERC20Token');
 const MultiLibrary = require('Embark/contracts/MultiLibrary');
@@ -6,10 +6,10 @@ const indexes = require('./helpers/ChannelDataIndexes.js')
 const StandardToken = require('Embark/contracts/StandardToken.sol');
 const Token = require('Embark/contracts/Token.sol');
 const closingHelper = require('./helpers/channelClosingHelper');
-const testConstant = require('./helpers/testConstant');
 const assertRevert = require('./helpers/assertRevert');
+const testConstant = require('./helpers/testConstant');
 
-contract("Testing Additional Tokens", function () {
+contract("Testing Adding Other Tokens", function () {
     this.timeout(0);
     let allAccounts;
     let userAddress;
@@ -17,6 +17,8 @@ contract("Testing Additional Tokens", function () {
     const timeout = 10;
     const initialCreation = 1000000000;
     const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
+    const userPk = Buffer.from(testConstant.USER_PK,'hex');
+    const recipientPk = Buffer.from(testConstant.RECIPIENT_PK,'hex');
     var nonce = 1;
     const port = testConstant.PORT; 
 
@@ -39,14 +41,6 @@ contract("Testing Additional Tokens", function () {
                     "port": port,
                     "type": "rpc",
                     "accounts": [
-                        // {
-                        //     "privateKeyFile": "test/helpers/privateKeys.js" // You can put more than one key, separated by , or ;
-                        // },
-                        // {
-                        //     "mnemonic": "example exile argue silk regular smile grass bomb merge arm assist farm",
-                        //     "addressIndex": "0", // Optional. The index to start getting the address
-                        //     "numAddresses": "10", // Optional. The number of addresses to get
-                        // }
                     ]},
                     contracts: {
                         "Token": {
@@ -56,7 +50,7 @@ contract("Testing Additional Tokens", function () {
 
                         },
                         "WETHToken": {
-                            args:[initialCreation, "WETH", 18, "WETH"],
+                            args:[initialCreation, "WETH", 18, "STK"],
                             "instanceOf": "ERC20Token",
                             "fromIndex":3
                         },
@@ -66,7 +60,7 @@ contract("Testing Additional Tokens", function () {
                             "fromIndex":3
                         },
                         "ERC20Token": {
-                            args: [initialCreation,'STKToken', 18, 'STK'],
+                            args: [initialCreation,'STK', 18, 'STK'],
                             "fromIndex":3
                         },
                         MultiLibrary: {
@@ -96,6 +90,7 @@ contract("Testing Additional Tokens", function () {
                 allAccounts = accounts;
                 userAddress = accounts[0];
                 recipientAddress = accounts[1];
+                signerAddress = accounts[2];
             });
         });
 

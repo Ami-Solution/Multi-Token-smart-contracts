@@ -25,11 +25,11 @@ module.exports = {
           "STK"
         ]
       }, 
-      STKLibrary: {
+      MultiLibrary: {
         args: [
         ],
       },
-      STKChannel: {
+      MultiChannel: {
         "deploy": false
       }      
     }
