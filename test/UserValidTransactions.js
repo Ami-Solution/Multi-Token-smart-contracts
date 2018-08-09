@@ -18,6 +18,7 @@ contract("Testing Valid Transactions made by User", function () {
     const initialCreation = 1000000000;
     const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
     const userPk = Buffer.from(testConstant.USER_PK,'hex');
+    const recipientPk = Buffer.from(testConstant.RECIPIENT_PK, 'hex'); 
     const recipientAddressPk = Buffer.from(testConstant.RECIPIENT_PK,'hex');
     var nonce = 1;
     const port = testConstant.PORT; 
@@ -127,10 +128,9 @@ contract("Testing Valid Transactions made by User", function () {
         {
             nonce++;
             const amount = 50;
-            const returnToken = false;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.options.address,recipientPk);
 
-            await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
+            await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:userAddress});
             const data  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];
@@ -249,9 +249,9 @@ contract("Testing Valid Transactions made by User", function () {
             nonce++;
             const amount = 50;
             const returnToken = false;
-            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,recipientPk);
 
-            await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,returnToken).send({from:userAddress});
+            await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:userAddress});
             const data  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const closedNonce = data[indexes.CLOSED_NONCE];

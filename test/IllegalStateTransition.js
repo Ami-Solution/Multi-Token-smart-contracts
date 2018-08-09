@@ -333,7 +333,7 @@ contract("Testing Invalid Transactions", function () {
 
             try
             {
-                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:userAddress});
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:userAddress});
                 assert.fail("User should not be able to update a closed channel with an amount greater than what's placed in escrow");
             }
             catch (error)
@@ -342,14 +342,14 @@ contract("Testing Invalid Transactions", function () {
             }
         });
 
-        it("Recipient Address should not be able to contest an amount greater than deposited", async() =>
+        it("Recipient should not be able to contest an amount greater than deposited", async() =>
         {
             amount = 10000;
             const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
 
             try
             {
-                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:recipientAddress});
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:recipientAddress});
                 assert.fail("Recipient Address should not be able to update a closed channel with an amount greater than what's placed in escrow");
             }
             catch (error)
@@ -357,6 +357,38 @@ contract("Testing Invalid Transactions", function () {
                 assertRevert(error);
             }
         });
+
+        it("Recipient should not be able to contest with self-signed signature", async() =>
+        {
+            amount = 3; 
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,recipientPk);
+
+            try
+            {
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:recipientAddress});
+                assert.fail("Recipient Address should not be able to contest with a self-signed signature");
+            }
+            catch (error)
+            {
+                assertRevert(error);
+            }
+        });        
+
+        it("User should not be able to contest with self-signed signature", async() =>
+        {
+            amount = 3; 
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,userPk);
+
+            try
+            {
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:userPk});
+                assert.fail("Recipient Address should not be able to contest with a self-signed signature");
+            }
+            catch (error)
+            {
+                assertRevert(error);
+            }
+        });        
 
         it("User should not be able to settle before time period is over", async() =>
         {
@@ -383,5 +415,47 @@ contract("Testing Invalid Transactions", function () {
                 assertRevert(error);
             }
         });
+
+        it("Recipient Address should not be able to contest after contest period is over", async() =>
+        {
+            for (i = 0; i<=timeout; i++)
+            {
+                var transaction = {from:allAccounts[7],to:allAccounts[8],gasPrice:1000000000,value:2};
+                web3.eth.sendTransaction(transaction);
+            }      
+
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
+
+            try
+            {
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:recipientAddress});
+                assert.fail("Recipient Address should not be able to update a channel after contest period is over");
+            }
+            catch (error)
+            {
+                assertRevert(error);
+            }
+        });        
+
+        it("User should not be able to contest after contest period is over", async() =>
+        {
+            for (i = 0; i<=timeout; i++)
+            {
+                var transaction = {from:allAccounts[7],to:allAccounts[8],gasPrice:1000000000,value:2};
+                web3.eth.sendTransaction(transaction);
+            }      
+
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,recipientPk);
+
+            try
+            {
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:userAddress});
+                assert.fail("User should not be able to update a channel after contest period is over");
+            }
+            catch (error)
+            {
+                assertRevert(error);
+            }
+        });          
 
     });

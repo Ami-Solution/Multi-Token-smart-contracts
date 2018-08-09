@@ -277,7 +277,7 @@ contract("Testing Non Channel Participants", function () {
             
             try
             {
-                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:allAccounts[5]});
                 assert.fail("Non channel participant should not be able to contest channel with valid signature");
             }
             catch (error)
@@ -295,7 +295,7 @@ contract("Testing Non Channel Participants", function () {
             
             try
             {
-                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:allAccounts[5]});
                 assert.fail("Should not be able to contest channel with invalid signature");
             }
             catch (error)
@@ -306,6 +306,52 @@ contract("Testing Non Channel Participants", function () {
         
         it("Cannot contest channel with invalid signature", async() =>
         {
+            nonce++;
+            const amount = 2;
+            
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,nonParticipant);
+            
+            try
+            {
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:allAccounts[5]});
+                assert.fail("Non channel participant should not be able to contest");
+            }
+            catch (error)
+            {
+                assertRevert(error);
+            }
+        });     
+
+        it("Cannot contest channel with valid signature after timeout", async() =>
+        {
+            for (i = 0; i<=timeout; i++)
+            {
+                var transaction = {from:allAccounts[7],to:allAccounts[8],gasPrice:1000000000,value:2};
+                web3.eth.sendTransaction(transaction);
+            }              
+            nonce++;
+            const amount = 2;
+            
+            const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address,nonce,amount,MultiChannel.address,signersPk);
+            
+            try
+            {
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s,true).send({from:allAccounts[5]});
+                assert.fail("Should not be able to contest channel with invalid signature");
+            }
+            catch (error)
+            {
+                assertRevert(error);
+            }
+        });        
+        
+        it("Cannot contest channel with invalid signature past timeout period", async() =>
+        {
+            for (i = 0; i<=timeout; i++)
+            {
+                var transaction = {from:allAccounts[7],to:allAccounts[8],gasPrice:1000000000,value:2};
+                web3.eth.sendTransaction(transaction);
+            }              
             nonce++;
             const amount = 2;
             
