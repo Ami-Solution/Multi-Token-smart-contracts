@@ -61,11 +61,13 @@ contract MultiChannel
 
     /**
     * @notice Function to close the payment channel.
+    * @param _addressOfToken The address of the token the user wants to interact with. 
     * @param _nonce The nonce of the deposit. Used for avoiding replay attacks.
     * @param _amount The amount of tokens claimed to be due to the receiver.
     * @param _v Cryptographic param v derived from the signature.
     * @param _r Cryptographic param r derived from the signature.
     * @param _s Cryptographic param s derived from the signature.
+    * @param _returnToken Determines to/to not return funds to user after settle. 
     */
     function close(
         address _addressOfToken,
@@ -85,6 +87,7 @@ contract MultiChannel
 
     /**
     * @notice Function to close the payment channel without a signature.
+    * @param _addressOfToken The address of the token the user wants to interact with. 
     */
     function closeWithoutSignature(
         address _addressOfToken)
@@ -97,6 +100,7 @@ contract MultiChannel
 
     /**
     * @notice Function to contest the closing state of the payment channel. Will be able to be called for a time period (in blocks) given by timeout after closing of the channel.
+    * @param _addressOfToken The address of the token the user wants to interact with. 
     * @param _nonce The nonce of the deposit. Used for avoiding replay attacks.
     * @param _amount The amount of tokens claimed to be due to the receiver.
     * @param _v Cryptographic param v derived from the signature.
@@ -119,6 +123,7 @@ contract MultiChannel
 
     /**
     * @notice After the timeout of the channel after closing has passed, can be called by either participant to withdraw funds.
+    * @param _addressOfToken The address of the multichannel to interact with. 
     */
     function settle( address _addressOfToken)
         external
@@ -127,6 +132,13 @@ contract MultiChannel
         channels[_addressOfToken].settle(address(this));
     }
 
+    /**
+    * @notice Adding new tokens to the respective channel
+    * @param _addressOfToken The address of the token the user wants to interact with. 
+    * @param _from The address of the user. After the settle, the funds will be returned here. 
+    * @param _addressOfSigner The addres of the signer. 
+    * @param _expiryNumberOfBlocks The timeout period for the given channel. 
+    */
     function addChannel(address _addressOfToken, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
         external
         channelDoesNotExist(_addressOfToken)
@@ -135,6 +147,11 @@ contract MultiChannel
         channels[_addressOfToken].token_ = ERC20Token(_addressOfToken);
         channels[_addressOfToken].addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
     }
+
+    /** 
+    * @notice Getting individual channel data regarding tokens 
+    * @param _addressOfToken The address of the token the user wants to interact with. 
+     */
 
     function getChannelData(address _addressOfToken) view public returns (address, address, address, uint, uint, uint, uint, bool) {
         MultiLibrary.MultiChannelData channel = channels[_addressOfToken];
