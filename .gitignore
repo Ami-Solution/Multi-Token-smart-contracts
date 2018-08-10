@@ -6,4 +6,5 @@ deployedAddress.json
 bin/
 .embark/* 
 chains.json  
-test/helpers/testConstant.js
+test/helpers/testConstant.js 
+.gitignore
