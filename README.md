@@ -18,21 +18,18 @@ Solidity v0.4.23 (solc-js)
 Ganache CLI v6.1.0 (ganache-core: 2.1.0)
 ```
 
-By default, the repo assumes the following: 
+
+### Ganache Command Line Interface  
+
+**Beware**: IF the tests do not work as expected, especially causing `VM Exception: Revert`, it is likely you forgot to replace the signer's private key, in which case, tests are not expected to work. 
+
+You can start the instance using Embark through the command: `embark simulator`. This will start a `ganache-cli` instance with mnemonic, port, private keys, and public keys. 
+
+The repo assumes the following values: 
  - address[0]: user's address 
  - address[1]: signer's address 
  - address[2]: recipient's address 
 Take the above and their respective private keys and paste them in the [testConstants file](./test/helpers/testConstant.js)
-
-### Ganache Command Line Interface 
-
-To install, you can use `npm install -g ganache-cli`. 
-
-Use the third private key address in the CLI and replace this with the `signerPk` in `./test/StkChannelClosing.js`. 
-
-**Beware**: IF the tests do not work as expected, especially causing `VM Exception: Revert`, it is likely you forgot to replace the signer's private key, in which case, tests are not expected to work. 
-
-You can start the instance using Embark through the command: `embark simulator`. Replace the port with the instances in all the tests. 
 
 ## Running Tests
 
