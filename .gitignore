@@ -1,0 +1,10 @@
+build/
+node*/
+deployedAddress.json
+.idea/
+.DS_Store
+bin/
+.embark/* 
+chains.json  
+test/helpers/testConstant.js 
+.gitignore
