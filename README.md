@@ -27,7 +27,9 @@ You can start the instance using Embark through the command: `embark simulator`.
 The repo assumes the following values: 
  - address[0]: user's address 
  - address[1]: signer's address 
- - address[2]: recipient's address 
+ - address[2]: recipient's address  
+ - address[3]: non participant's address 
+ - port: insert the port number after running `embark simulator` 
 Take the above and their respective private keys and paste them in the [testConstants file](./test/helpers/testConstant.js)
 
 ## Running Tests
