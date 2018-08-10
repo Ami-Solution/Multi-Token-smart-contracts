@@ -1,5 +1,5 @@
 # Multi-token-smart-contracts
-Smart contracts for the STK token payment channel. This repo contains the logic to implement a Payment Channel using ERC20 Tokens. The files contained here are still in development and will be updated in the interests of functionality and security. This is *not* to be considered the final version. Code related comments can be sent to info@getstack.ca . We appreciate your feedback!
+Smart contracts for the Multitoken token payment channel. This repo contains the logic to implement a Payment Channel using ERC20 Tokens. The files contained here are still in development and will be updated in the interests of functionality and security. This is *not* to be considered the final version. Code related comments can be posted in our issues. We appreciate your feedback!
 
 ## Initialize
 
@@ -47,3 +47,5 @@ You can deploy your tests by running:
 `embark run testnet` 
 
 Ensure that you have MNEMONIC and INFURA declared in your process environment. 
+
+If you run into any problems, please create an Issue and we would be happy look into it! 
