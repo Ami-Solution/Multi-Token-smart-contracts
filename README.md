@@ -18,7 +18,6 @@ Solidity v0.4.23 (solc-js)
 Ganache CLI v6.1.0 (ganache-core: 2.1.0)
 ```
 
-
 ### Ganache Command Line Interface  
 
 **Beware**: IF the tests do not work as expected, especially causing `VM Exception: Revert`, it is likely you forgot to replace the signer's private key, in which case, tests are not expected to work. 
@@ -44,5 +43,11 @@ You can deploy your tests by running:
 `embark run testnet` 
 
 Ensure that you have MNEMONIC and INFURA declared in your process environment. 
+
+## Running on Remix 
+
+If you want to give our code a try on REMIX, you can use our signing library by inserting the required addresses [on how to sign transactions](https://github.com/STKtoken/Multi-Token-smart-contracts/wiki/How-to-Sign-Transactions). 
+
+You can run it using `node generateMultitokenKey.js`. Have fun! 
 
 If you run into any problems, please create an Issue and we would be happy look into it! 
