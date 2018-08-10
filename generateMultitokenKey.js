@@ -7,14 +7,14 @@ const prefix = new Buffer("\x19Ethereum Signed Message:\n");
 
 
 var cryptoParams;
-const userAddress = "0xd46920A8E431F362AE8b512C1d4BAa767389862D";
-const signerAddress = "0x9A2cdf03ca133a21E6357BfD1951c206CA090cD4";
-const tokenAddress = "0xfdFC29f85e24D4BB0F3CD557b01492f9Ea976595"; 
-var signerPk = "ea2624dcf732a5a08c99648d78f1b6b887bfe3198c90deaa9f8a6a14ca2c4b95";
-var STKChannelAddr = "0x70458596bafb041c1f836a3a80249db65a41ffdf";
+const userAddress = "addressYouWantTokenReturnedTo";
+const signerAddress = "addressOfSigner";
+const tokenAddress = "AnyErc20Token"; 
+var signerPk = "privateKeyAssociatedWithAddressOfSigner";
+var MultiChannelAddr = "channelAddress";
 var pkBuffer = Buffer.from(signerPk, "hex");
-var nonce = 1; //Keep incrementing this every time a channel is closed and/or contested
-var amount = 1 //Ensure this amount is in the payment channel 
+var nonce = 1; 
+var amount = 1 
 
 console.log("-----------Initialize STKChannel------------\n")
 console.log("\"" + userAddress + "\",\"" + signerAddress + "\",\"" + tokenAddress + "\",\"" + "1" + "\"\n");
@@ -22,7 +22,7 @@ console.log("\"" + userAddress + "\",\"" + signerAddress + "\",\"" + tokenAddres
 console.log("-----------Add Payment Channel------------\n")
 console.log("\"" + tokenAddress + "\",\"" + userAddress + "\",\"" + signerAddress + "\",\"" + "1" + "\"\n");
 
-signTransaction(STKChannelAddr, tokenAddress, nonce, amount, pkBuffer);
+signTransaction(MultiChannelAddr, tokenAddress, nonce, amount, pkBuffer);
 
 
 function signTransaction(STKChannelAddr, tokenAddress, nonce, amount, pk) {
