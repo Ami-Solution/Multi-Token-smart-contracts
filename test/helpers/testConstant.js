@@ -1,8 +1,8 @@
 module.exports =
 {
-    USER_PK:'',
-    RECIPIENT_PK:'',
-    SIGNER_PK:'',
-    NON_PARTICIPANT:'',
-    PORT:portNumber
+    USER_PK:'f942d5d524ec07158df4354402bfba8d928c99d0ab34d0799a6158d56156d986',
+    RECIPIENT_PK:'88f37cfbaed8c0c515c62a17a3a1ce2f397d08bbf20dcc788b69f11b5a5c9791',
+    SIGNER_PK:'f4ebc8adae40bfc741b0982c206061878bffed3ad1f34d67c94fa32c3d33eac8',
+    NON_PARTICIPANT:'ca67021a16478270ede4fddd65d0c031c75cd36c13b6a56bcb767928c1c2cf86',
+    PORT:8555
 }

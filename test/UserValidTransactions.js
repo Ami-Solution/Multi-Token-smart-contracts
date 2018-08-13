@@ -23,14 +23,6 @@ contract("Testing Valid Transactions made by User", function () {
     var nonce = 1;
     const port = testConstant.PORT; 
 
-    config({
-        deployment: {
-            "host": "localhost",
-            "port": port,
-            "type": "rpc"
-        }
-    });
-
     before(function(done) {
         web3.eth.getAccounts(function (err, accounts) {
             if (err) {
@@ -38,54 +30,57 @@ contract("Testing Valid Transactions made by User", function () {
             }
             config({
                 "deployment": {
-                    "host": "localhost",
-                    "port": port,
-                    "type": "rpc",
                     "accounts": [
-                    ]},
-                    contracts: {
-                        "Token": {
-
-                        },
-                        "StandardToken": {
-
-                        },
-                        "WETHToken": {
-                            args:[initialCreation, "WETH", 18, "STK"],
-                            "instanceOf": "ERC20Token",
-                            "fromIndex":3
-                        },
-                        "ThingToken": {
-                            args:[initialCreation, "Thing", 18, "THG"],
-                            "instanceOf": "ERC20Token",
-                            "fromIndex":3
-                        },
-                        "ERC20Token": {
-                            args: [initialCreation,'STK', 18, 'STK'],
-                            "fromIndex":3
-                        },
-                        MultiLibrary: {
-                            args: [
-                                '$ERC20Token',
-                                accounts[0],
-                                accounts[2],
-                                accounts[1],
-                                timeout,
-                                1,
-                                0,
-                                0
-                            ],
-                            "fromIndex":1
-                        },
-                        "MultiChannel": {
-                            args: [
-                                accounts[0],
-                                accounts[2],
-                                '$ERC20Token',
-                                timeout
-                            ],
-                            "fromIndex":1
+                        {
+                        "mnemonic":"example exile argue silk regular smile grass bomb merge arm assist farm", 
+                        "numAddresses":10,
+                        "addressIndex": "0",
+                        "hdpath":"m/44'/60'/0'/0/"
                         }
+                    ]},
+                contracts: {
+                    "Token": {
+
+                    },
+                    "StandardToken": {
+
+                    },
+                    "WETHToken": {
+                        args:[initialCreation, "WETH", 18, "STK"],
+                        "instanceOf": "ERC20Token",
+                        "fromIndex":3
+                    },
+                    "ThingToken": {
+                        args:[initialCreation, "Thing", 18, "THG"],
+                        "instanceOf": "ERC20Token",
+                        "fromIndex":3
+                    },
+                    "ERC20Token": {
+                        args: [initialCreation,'STK', 18, 'STK'],
+                        "fromIndex":3
+                    },
+                    MultiLibrary: {
+                        args: [
+                            '$ERC20Token',
+                            accounts[0],
+                            accounts[2],
+                            accounts[1],
+                            timeout,
+                            1,
+                            0,
+                            0
+                        ],
+                        "fromIndex":1
+                    },
+                    "MultiChannel": {
+                        args: [
+                            accounts[0],
+                            accounts[2],
+                            '$ERC20Token',
+                            timeout
+                        ],
+                        "fromIndex":1
+                    }
                     }
                 }, done);
                 allAccounts = accounts;
