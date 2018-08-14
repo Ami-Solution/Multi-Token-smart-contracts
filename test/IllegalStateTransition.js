@@ -401,6 +401,7 @@ config({
 
         it("Recipient Address should not be able to contest after contest period is over", async() =>
         {
+            const amount = 1; 
             for (i = 0; i<=timeout; i++)
             {
                 var transaction = {from:allAccounts[7],to:allAccounts[8],gasPrice:1000000000,value:2};
@@ -411,7 +412,7 @@ config({
 
             try
             {
-                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({from:recipientAddress});
+                await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address,nonce,amount, cryptoParams.v,cryptoParams.r,cryptoParams.s).send({from:recipientAddress});
                 assert.fail("Recipient Address should not be able to update a channel after contest period is over");
             }
             catch (error)
@@ -422,6 +423,7 @@ config({
 
         it("User should not be able to contest after contest period is over", async() =>
         {
+            const amount = 1; 
             for (i = 0; i<=timeout; i++)
             {
                 var transaction = {from:allAccounts[7],to:allAccounts[8],gasPrice:1000000000,value:2};
