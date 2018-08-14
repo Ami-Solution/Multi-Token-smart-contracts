@@ -8,92 +8,76 @@ const Token = require('Embark/contracts/Token.sol');
 const closingHelper = require('./helpers/channelClosingHelper');
 const assertRevert = require('./helpers/assertRevert');
 const testConstant = require('./helpers/testConstant');
+const allAccounts = testConstant.ACCOUNTS; 
+const initialCreation = testConstant.INIT;
+const timeout = testConstant.TIMEOUT;
 
-contract("Testing Valid Transactions made by User", function () {
-    this.timeout(0);
-    let allAccounts;
-    let userAddress;
-    let recipientAddressAddress;
-    const timeout = 10;
-    const initialCreation = 1000000000;
-    const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
-    const userPk = Buffer.from(testConstant.USER_PK,'hex');
-    const recipientPk = Buffer.from(testConstant.RECIPIENT_PK, 'hex'); 
-    const recipientAddressPk = Buffer.from(testConstant.RECIPIENT_PK,'hex');
-    var nonce = 1;
-    const port = testConstant.PORT; 
+config({
+    "deployment": {
+        "accounts": [
+            {
+                "mnemonic":testConstant.MNEMONIC,
+                "numAddresses":testConstant.NUM_ADDRESS,
+                "addressIndex": testConstant.INDEX,
+                "hdpath":testConstant.PATH
+            }
+        ]},
+        contracts: {
+            "Token": {
 
-    config({
-        deployment: {
-            "host": "localhost",
-            "port": port,
-            "type": "rpc"
+            },
+            "StandardToken": {
+
+            },
+            "WETHToken": {
+                args:[initialCreation, "WETH", 18, "STK"],
+                "instanceOf": "ERC20Token",
+                "from": allAccounts[3]
+            },
+            "ThingToken": {
+                args:[initialCreation, "Thing", 18, "THG"],
+                "instanceOf": "ERC20Token",
+                "from": allAccounts[3]
+            },
+            "ERC20Token": {
+                args: [initialCreation,'STK', 18, 'STK'],
+                "from": allAccounts[3]
+            },
+            MultiLibrary: {
+                args: [
+                    '$ERC20Token',
+                    '0xC6eA7fD8628672780dd4F17Ffda321AA6753134B',
+                    allAccounts[2],
+                    allAccounts[1],
+                    timeout,
+                    1,
+                    0,
+                    0
+                ],
+                "fromIndex":1
+            },
+            "MultiChannel": {
+                args: [
+                    allAccounts[0],
+                    allAccounts[2],
+                    '$ERC20Token',
+                    timeout
+                ],
+                "from": allAccounts[1]
+            }
         }
     });
 
-    before(function(done) {
-        web3.eth.getAccounts(function (err, accounts) {
-            if (err) {
-                return done(err);
-            }
-            config({
-                "deployment": {
-                    "host": "localhost",
-                    "port": port,
-                    "type": "rpc",
-                    "accounts": [
-                    ]},
-                    contracts: {
-                        "Token": {
-
-                        },
-                        "StandardToken": {
-
-                        },
-                        "WETHToken": {
-                            args:[initialCreation, "WETH", 18, "STK"],
-                            "instanceOf": "ERC20Token",
-                            "fromIndex":3
-                        },
-                        "ThingToken": {
-                            args:[initialCreation, "Thing", 18, "THG"],
-                            "instanceOf": "ERC20Token",
-                            "fromIndex":3
-                        },
-                        "ERC20Token": {
-                            args: [initialCreation,'STK', 18, 'STK'],
-                            "fromIndex":3
-                        },
-                        MultiLibrary: {
-                            args: [
-                                '$ERC20Token',
-                                accounts[0],
-                                accounts[2],
-                                accounts[1],
-                                timeout,
-                                1,
-                                0,
-                                0
-                            ],
-                            "fromIndex":1
-                        },
-                        "MultiChannel": {
-                            args: [
-                                accounts[0],
-                                accounts[2],
-                                '$ERC20Token',
-                                timeout
-                            ],
-                            "fromIndex":1
-                        }
-                    }
-                }, done);
-                allAccounts = accounts;
-                userAddress = accounts[0];
-                recipientAddressAddress = accounts[1];
-                signerAddress = accounts[2];
-            });
-        });
+    contract("Testing Valid Transactions made by User", function () {
+        this.timeout(0);
+        let userAddress = allAccounts[0]; 
+        let recipientAddress= allAccounts[1]; 
+        let signerAddress = allAccounts[2]; 
+        const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
+        const userPk = Buffer.from(testConstant.USER_PK,'hex');
+        const recipientPk = Buffer.from(testConstant.RECIPIENT_PK, 'hex');
+        const recipientAddressPk = Buffer.from(testConstant.RECIPIENT_PK,'hex');
+        var nonce = 1;
 
         it("Multi Channel balance should be 50 after transferring 50 tokens",async() =>
         {
@@ -318,20 +302,20 @@ contract("Testing Valid Transactions made by User", function () {
             {
                 var transaction = {from:allAccounts[7],to:allAccounts[8],gasPrice:1000000000,value:2};
                 web3.eth.sendTransaction(transaction);
-            }            
+            }
             const dataBefore  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const depositedTokens = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
             const oldStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
             const oldUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
             const amountOwed = dataBefore[indexes.AMOUNT_OWED];
-            
+
             await MultiChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
             const dataAfter  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
-            
+
             const newUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
             const newStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
-            
+
             assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf())>0,"Amount owed before settling should be equal to 0");
             assert.strictEqual(dataBefore[indexes.SHOULD_RETURN],true,"Should return_token should have been set to true");
             assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf())>0,"Amount owed before settling should be greater than 0");
@@ -360,20 +344,20 @@ contract("Testing Valid Transactions made by User", function () {
             {
                 var transaction = {from:allAccounts[7],to:allAccounts[8],gasPrice:1000000000,value:2};
                 web3.eth.sendTransaction(transaction);
-            }            
+            }
             const dataBefore  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
             const depositedTokens = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
             const oldStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
             const oldUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
             const amountOwed = dataBefore[indexes.AMOUNT_OWED];
-            
+
             await MultiChannel.methods.settle(ERC20Token.options.address).send({from:allAccounts[1]});
             const dataAfter  = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
-            
+
             const newUserBalance = await ERC20Token.methods.balanceOf(allAccounts[0]).call();
             const newStackBalance = await ERC20Token.methods.balanceOf(allAccounts[1]).call();
-            
+
             assert.strictEqual(dataBefore[indexes.SHOULD_RETURN],true,"Should return_token should have been set to true");
             assert.strictEqual(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf()),0,"Amount owed before settling should be equal to 0");
             assert.strictEqual(parseInt(dataAfter[indexes.AMOUNT_OWED].valueOf()),0,"Amount owed after settling should be 0");

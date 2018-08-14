@@ -20,17 +20,7 @@ Ganache CLI v6.1.0 (ganache-core: 2.1.0)
 
 ### Ganache Command Line Interface  
 
-**Beware**: IF the tests do not work as expected, especially causing `VM Exception: Revert`, it is likely you forgot to replace the signer's private key, in which case, tests are not expected to work. 
-
-You can start the instance using Embark through the command: `embark simulator`. This will start a `ganache-cli` instance with mnemonic, port, private keys, and public keys. 
-
-The repo assumes the following values: 
- - address[0]: user's address 
- - address[1]: signer's address 
- - address[2]: recipient's address  
- - address[3]: non participant's address 
- - port: insert the port number after running `embark simulator` 
-Take the above and their respective private keys and paste them in the [testConstants file](./test/helpers/testConstant.js)
+Embark will start the `ganache-cli` instance. Our settings in the constant file will ensure that your environment is properly set up for you. 
 
 ## Running Tests
 
