@@ -7,6 +7,7 @@ const StandardToken = require('Embark/contracts/StandardToken.sol');
 const Token = require('Embark/contracts/Token.sol');
 const MockERC223 = require('Embark/contracts/MockERC223');
 const MockBurn = require('Embark/contracts/MockBurn'); 
+const MockCapped = require('Embark/contracts/MockCapped');
 const closingHelper = require('./helpers/channelClosingHelper');
 const assertRevert = require('./helpers/assertRevert');
 const testConstant = require('./helpers/testConstant');
@@ -25,12 +26,6 @@ config({
             }
     ]},
     contracts: {
-        "Token": {
-
-        },
-        "StandardToken": {
-
-        },
         MockBurn: { 
             args:[initialCreation,"BRN",18,"BRN"], 
             from: allAccounts[3]
@@ -50,14 +45,6 @@ config({
         },
         MultiLibrary: {
             args: [
-                '$ERC20Token',
-                '0xC6eA7fD8628672780dd4F17Ffda321AA6753134B',
-                allAccounts[2],
-                allAccounts[1],
-                timeout,
-                1,
-                0,
-                0
             ],
             "fromIndex":1
         },
