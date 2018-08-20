@@ -7,14 +7,14 @@ const testConstant = require('./helpers/testConstant');
 const allAccounts = testConstant.ACCOUNTS;
 const initialCreation = testConstant.INIT;
 const timeout = testConstant.TIMEOUT;
-let userAddress = allAccounts[0];
-let recipientAddress = allAccounts[1];
-let signerAddress = allAccounts[2]; 
-let nonParticipantAddress = allAccounts[3];
+const userAddress = allAccounts[0];
+const recipientAddress = allAccounts[1];
+const signerAddress = allAccounts[2]; 
+const nonParticipantAddress = allAccounts[3];
 const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
 const userPk = Buffer.from(testConstant.USER_PK, 'hex');
 const recipientPk = Buffer.from(testConstant.RECIPIENT_PK, 'hex');
-var nonce = 1;
+let nonce = 1;
 
 contract("Illegal State Transition", function () {
     beforeEach((done) => {
@@ -45,7 +45,6 @@ contract("Illegal State Transition", function () {
                 MultiLibrary: {
                     args: [
                         '$ERC20Token',
-                        '0xC6eA7fD8628672780dd4F17Ffda321AA6753134B',
                         signerAddress,
                         recipientAddress,
                         timeout,
@@ -110,7 +109,7 @@ contract("Illegal State Transition", function () {
             from: userAddress
         });
 
-        var amount = 1;
+        let amount = 1;
         const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         try {
             await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({
@@ -146,7 +145,7 @@ contract("Illegal State Transition", function () {
 
     it("User cannot close channel with amount greater than deposited", async () => {
         nonce++;
-        var amount = 150;
+        let amount = 150;
 
         const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         try {
@@ -232,7 +231,7 @@ contract("Illegal State Transition", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
@@ -266,7 +265,7 @@ contract("Illegal State Transition", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
@@ -300,7 +299,7 @@ contract("Illegal State Transition", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
@@ -333,7 +332,7 @@ contract("Illegal State Transition", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
@@ -365,7 +364,7 @@ contract("Illegal State Transition", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
@@ -396,7 +395,7 @@ contract("Illegal State Transition", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
@@ -426,7 +425,7 @@ contract("Illegal State Transition", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
@@ -461,7 +460,7 @@ contract("Illegal State Transition", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
@@ -497,7 +496,7 @@ contract("Illegal State Transition", function () {
         });
 
         nonce++; 
-        var amount = 2;
+        let amount = 2;
 
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
@@ -533,7 +532,7 @@ contract("Illegal State Transition", function () {
         });
 
         nonce++; 
-        var amount = 2;
+        let amount = 2;
 
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
@@ -568,7 +567,7 @@ contract("Illegal State Transition", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
@@ -600,7 +599,7 @@ contract("Illegal State Transition", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
@@ -632,7 +631,7 @@ contract("Illegal State Transition", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
@@ -641,7 +640,7 @@ contract("Illegal State Transition", function () {
 
         amount = 1;
         for (i = 0; i <= timeout; i++) {
-            var transaction = {
+            let transaction = {
                 from: nonParticipantAddress,
                 to: userAddress,
                 gasPrice: 1000000000,
@@ -677,7 +676,7 @@ contract("Illegal State Transition", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
@@ -686,7 +685,7 @@ contract("Illegal State Transition", function () {
 
         amount = 1;
         for (i = 0; i <= timeout; i++) {
-            var transaction = {
+            let transaction = {
                 from: nonParticipantAddress,
                 to: userAddress,
                 gasPrice: 1000000000,

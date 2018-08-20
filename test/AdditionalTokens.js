@@ -7,12 +7,12 @@ const testConstant = require('./helpers/testConstant');
 const allAccounts = testConstant.ACCOUNTS;
 const initialCreation = testConstant.INIT;
 const timeout = testConstant.TIMEOUT;
-let userAddress = allAccounts[0];
-let recipientAddress = allAccounts[1];
-let signerAddress = allAccounts[2]; 
-let nonParticipantAddress = allAccounts[3];
+const userAddress = allAccounts[0];
+const recipientAddress = allAccounts[1];
+const signerAddress = allAccounts[2]; 
+const nonParticipantAddress = allAccounts[3];
 const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
-var nonce = 1;
+let nonce = 1;
 
 contract("Additional Token Tests", function () {
     beforeEach((done) => {
@@ -43,7 +43,6 @@ contract("Additional Token Tests", function () {
                 MultiLibrary: {
                     args: [
                         '$ERC20Token',
-                        '0xC6eA7fD8628672780dd4F17Ffda321AA6753134B',
                         signerAddress,
                         recipientAddress,
                         timeout,
@@ -132,7 +131,7 @@ contract("Additional Token Tests", function () {
             from: nonParticipantAddress
         });
 
-        amount = 0;
+        let amount = 0;
         const cryptoParams = closingHelper.getClosingParameters(ThingToken.options.address, nonce, amount, MultiChannel.address, signersPk);
 
         try {
@@ -147,7 +146,7 @@ contract("Additional Token Tests", function () {
 
     it("Recipient Address cannot close an uninitialized channel", async () => {
 
-        amount = 0;
+        let amount = 0;
         const cryptoParams = closingHelper.getClosingParameters(ThingToken.options.address, nonce, amount, MultiChannel.address, signersPk);
 
         try {
@@ -162,7 +161,7 @@ contract("Additional Token Tests", function () {
 
     it("User cannot settle an uninitialized channel", async () => {
 
-        amount = 0;
+        let amount = 0;
         const cryptoParams = closingHelper.getClosingParameters(ThingToken.options.address, nonce, amount, MultiChannel.address, signersPk);
 
         try {
@@ -177,7 +176,7 @@ contract("Additional Token Tests", function () {
 
     it("Recipient Address cannot settle an uninitialized channel", async () => {
 
-        amount = 0;
+        let amount = 0;
         const cryptoParams = closingHelper.getClosingParameters(ThingToken.options.address, nonce, amount, MultiChannel.address, signersPk);
 
         try {

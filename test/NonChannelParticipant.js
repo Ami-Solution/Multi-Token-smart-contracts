@@ -7,15 +7,15 @@ const testConstant = require('./helpers/testConstant');
 const allAccounts = testConstant.ACCOUNTS;
 const initialCreation = testConstant.INIT;
 const timeout = testConstant.TIMEOUT;
-let userAddress = allAccounts[0];
-let recipientAddress = allAccounts[1];
-let signerAddress = allAccounts[2];
-let nonParticipantAddress = allAccounts[3];
+const userAddress = allAccounts[0];
+const recipientAddress = allAccounts[1];
+const signerAddress = allAccounts[2];
+const nonParticipantAddress = allAccounts[3];
 const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
 const userPk = Buffer.from(testConstant.USER_PK, 'hex');
 const recipientPk = Buffer.from(testConstant.RECIPIENT_PK, 'hex');
 const nonParticipantPK = Buffer.from(testConstant.NON_PARTICIPANT, 'hex'); 
-var nonce = 1;
+let nonce = 1;
 
 contract("Non Channel Participant Actions", function () {
     beforeEach((done) => {
@@ -46,7 +46,6 @@ contract("Non Channel Participant Actions", function () {
                 MultiLibrary: {
                     args: [
                         '$ERC20Token',
-                        '0xC6eA7fD8628672780dd4F17Ffda321AA6753134B',
                         signerAddress,
                         recipientAddress,
                         timeout,
@@ -175,8 +174,8 @@ contract("Non Channel Participant Actions", function () {
         nonce++;
         const amount = 2;
 
-        const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
-        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
+        const validSig = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, validSig.v, validSig.r, validSig.s, true).send({
             from: recipientAddress
         });
 
@@ -219,10 +218,10 @@ contract("Non Channel Participant Actions", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
-        const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
-        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
+        const validSig = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, validSig.v, validSig.r, validSig.s, true).send({
             from: recipientAddress
         });
 
@@ -299,10 +298,10 @@ contract("Non Channel Participant Actions", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
-        const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
-        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
+        const validSig = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, validSig.v, validSig.r, validSig.s, true).send({
             from: recipientAddress
         });
 
@@ -336,10 +335,10 @@ contract("Non Channel Participant Actions", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
-        const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
-        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
+        const validSig = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, validSig.v, validSig.r, validSig.s, true).send({
             from: recipientAddress
         });
 
@@ -373,10 +372,10 @@ contract("Non Channel Participant Actions", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
-        const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
-        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
+        const validSig = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, validSig.v, validSig.r, validSig.s, true).send({
             from: recipientAddress
         });
 
@@ -410,10 +409,10 @@ contract("Non Channel Participant Actions", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
-        const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
-        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
+        const validSig = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, validSig.v, validSig.r, validSig.s, true).send({
             from: recipientAddress
         });
 
@@ -447,16 +446,16 @@ contract("Non Channel Participant Actions", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
-        const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
-        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
+        const validSig = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, validSig.v, validSig.r, validSig.s, true).send({
             from: recipientAddress
         });
 
     
         for (i = 0; i <= timeout; i++) {
-            var transaction = {
+            let transaction = {
                 from: nonParticipantAddress,
                 to: userAddress,
                 gasPrice: 1000000000,
@@ -494,16 +493,16 @@ contract("Non Channel Participant Actions", function () {
             from: userAddress
         });
 
-        var amount = 2;
+        let amount = 2;
 
-        const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
-        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
+        const validSig = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, validSig.v, validSig.r, validSig.s, true).send({
             from: recipientAddress
         });
 
 
         for (i = 0; i <= timeout; i++) {
-            var transaction = {
+            let transaction = {
                 from: nonParticipantAddress,
                 to: userAddress,
                 gasPrice: 1000000000,
