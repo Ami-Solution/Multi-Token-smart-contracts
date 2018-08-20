@@ -14,6 +14,7 @@ const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
 const userPk = Buffer.from(testConstant.USER_PK, 'hex');
 const recipientPk = Buffer.from(testConstant.RECIPIENT_PK, 'hex');
 var nonce = 1;
+var amount;
 
 config({
     "deployment": {
@@ -49,14 +50,14 @@ config({
             args: [
                 '$ERC20Token',
                 '0xC6eA7fD8628672780dd4F17Ffda321AA6753134B',
-                signerAddress,
+                userAddress,
                 signerAddress,
                 timeout,
                 1,
                 0,
                 0
             ],
-            "fromIndex": 1
+            "from": recipientAddress
         },
         "MultiChannel": {
             args: [
@@ -65,14 +66,13 @@ config({
                 '$ERC20Token',
                 timeout
             ],
-            "from": signerAddress
+            "from": recipientAddress
         }
     }
 });
 
 contract("Testing Illegal State Transitions", function () {
     this.timeout(0);
-
 
     it("User should not be able to update an open channel", async () => {
         const transfer = 50;
@@ -131,10 +131,10 @@ contract("Testing Illegal State Transitions", function () {
     })
 
     it("User cannot close channel with amount greater than deposited", async () => {
+        nonce++;
         const amount = 150;
 
-        const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
-
+        const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk); 
         try {
             await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, true).send({
                 from: userAddress
@@ -143,28 +143,43 @@ contract("Testing Illegal State Transitions", function () {
         } catch (error) {
             assertRevert(error);
         }
+        const data = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
+        console.log("open"); 
+        console.log(data);         
     });
 
     it("User cannot close channel with signer address signed transaction", async () => {
-        nonce++;
-        const amount = 2;
+        const data = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
+        console.log("open"); 
+        console.log(data);          
+        console.log("nonce: " + nonce + " amount : " + amount); 
 
-        const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
+        nonce++;
+        amount = 2;
+        const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, signersPk);
 
         try {
             await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, true).send({
                 from: userAddress
             });
-            assert.fail("User cannot close with amount greater than escrow");
+            const dataAfter = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
+            console.log("closed?"); 
+            console.log(dataAfter);          
+            console.log(userAddress); 
+            console.log(signersPk); 
+            console.log(signerAddress); 
+            console.log(allAccounts);
+            assert.fail("User cannot close channel with signer address");
         } catch (error) {
             assertRevert(error);
-        }
+        }      
     });
 
-    it("Recipient Address cannot close channel with amount greater than deposited", async () => {
-        const amount = 150;
+    it("Recipient Address cannot close channel with amount greater than deposited", async () => {         
 
-        const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
+        amount = 150;
+
+        const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, signersPk);
 
         try {
             await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, true).send({
@@ -203,10 +218,14 @@ contract("Testing Illegal State Transitions", function () {
     });
 
     it("User cannot use the same nonce for contesting channel", async () => {
-        nonce++;
         const amount = 2;
 
+
+
         const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
+
+        console.log(amount);
+
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
             from: recipientAddress
         });

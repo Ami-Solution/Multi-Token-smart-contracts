@@ -53,7 +53,7 @@ config({
                 0,
                 0
             ],
-            "fromIndex": 1
+            "from": recipientAddress
         },
         "MultiChannel": {
             args: [
