@@ -4,7 +4,10 @@ const allAccounts = testConstant.ACCOUNTS;
 const initialCreation = testConstant.INIT;
 const timeout = testConstant.TIMEOUT;
 let nonParticipantAddress = allAccounts[3];
-
+let userAddress = allAccounts[0];
+let recipientAddress = allAccounts[1];
+let signerAddress = allAccounts[2];
+let nonParticipantAddress = allAccounts[3];
 config({
     "deployment": {
         "accounts": [{
@@ -24,23 +27,23 @@ config({
         "WETHToken": {
             args: [initialCreation, "WETH", 18, "STK"],
             "instanceOf": "ERC20Token",
-            "from": allAccounts[3]
+            "from": nonParticipantAddress
         },
         "ThingToken": {
             args: [initialCreation, "Thing", 18, "THG"],
             "instanceOf": "ERC20Token",
-            "from": allAccounts[3]
+            "from": nonParticipantAddress
         },
         "ERC20Token": {
             args: [initialCreation, 'STK', 18, 'STK'],
-            "from": allAccounts[3]
+            "from": nonParticipantAddress
         },
         MultiLibrary: {
             args: [
                 '$ERC20Token',
                 '0xC6eA7fD8628672780dd4F17Ffda321AA6753134B',
-                allAccounts[2],
-                allAccounts[1],
+                signerAddress,
+                recipientAddress,
                 timeout,
                 1,
                 0,
@@ -50,12 +53,12 @@ config({
         },
         "MultiChannel": {
             args: [
-                allAccounts[0],
-                allAccounts[2],
+                userAddress,
+                signerAddress,
                 '$ERC20Token',
                 timeout
             ],
-            "from": allAccounts[1]
+            "from": recipientAddress
         }
     }
 });
