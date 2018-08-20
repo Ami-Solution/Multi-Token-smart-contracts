@@ -11,89 +11,111 @@ const timeout = testConstant.TIMEOUT;
 let userAddress = allAccounts[0];
 let recipientAddress = allAccounts[1];
 let signerAddress = allAccounts[2];
-let nonChannelParticipant = allAccounts[3];
+let nonParticipantAddress = allAccounts[3];
+const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
+const userPk = Buffer.from(testConstant.USER_PK, 'hex');
+const recipientPk = Buffer.from(testConstant.RECIPIENT_PK, 'hex');
+var nonce = 1;
 
-config({
-    "deployment": {
-        "accounts": [{
-            "mnemonic": testConstant.MNEMONIC,
-            "numAddresses": testConstant.NUM_ADDRESS,
-            "addressIndex": testConstant.INDEX,
-            "hdpath": testConstant.PATH
-        }]
-    },
-    contracts: {
-        "WETHToken": {
-            args: [initialCreation, "WETH", 18, "STK"],
-            "instanceOf": "ERC20Token",
-            "from": nonChannelParticipant
-        },
-        "ThingToken": {
-            args: [initialCreation, "Thing", 18, "THG"],
-            "instanceOf": "ERC20Token",
-            "from": nonChannelParticipant
-        },
-        "ERC20Token": {
-            args: [initialCreation, 'STK', 18, 'STK'],
-            "from": nonChannelParticipant
-        },
-        MultiLibrary: {
-            args: [
-                '$ERC20Token',
-                '0xC6eA7fD8628672780dd4F17Ffda321AA6753134B',
-                signerAddress,
-                recipientAddress,
-                timeout,
-                1,
-                0,
-                0
-            ],
-            "from": recipientAddress
-        },
-        "MultiChannel": {
-            args: [
-                userAddress,
-                signerAddress,
-                '$ERC20Token',
-                timeout
-            ],
-            "from": recipientAddress
-        }
-    }
-});
-
-contract("Testing Valid Transactions made by User", function () {
-    this.timeout(0);
-    const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
-    const userPk = Buffer.from(testConstant.USER_PK, 'hex');
-    const recipientPk = Buffer.from(testConstant.RECIPIENT_PK, 'hex');
-    const recipientAddressPk = Buffer.from(testConstant.RECIPIENT_PK, 'hex');
-    var nonce = 1;
+contract("Valid Transactions Made by User", function () {
+    beforeEach((done) => {
+        config({
+            "deployment": {
+                "accounts": [{
+                    "mnemonic": testConstant.MNEMONIC,
+                    "numAddresses": testConstant.NUM_ADDRESS,
+                    "addressIndex": testConstant.INDEX,
+                    "hdpath": testConstant.PATH
+                }]
+            },
+            contracts: {
+                "WETHToken": {
+                    args: [initialCreation, "WETH", 18, "STK"],
+                    "instanceOf": "ERC20Token",
+                    "from": nonParticipantAddress
+                },
+                "ThingToken": {
+                    args: [initialCreation, "Thing", 18, "THG"],
+                    "instanceOf": "ERC20Token",
+                    "from": nonParticipantAddress
+                },
+                "ERC20Token": {
+                    args: [initialCreation, 'STK', 18, 'STK'],
+                    "from": nonParticipantAddress
+                },
+                MultiLibrary: {
+                    args: [
+                        '$ERC20Token',
+                        '0xC6eA7fD8628672780dd4F17Ffda321AA6753134B',
+                        signerAddress,
+                        recipientAddress,
+                        timeout,
+                        1,
+                        0,
+                        0
+                    ],
+                    "from": recipientAddress
+                },
+                "MultiChannel": {
+                    args: [
+                        userAddress,
+                        signerAddress,
+                        '$ERC20Token',
+                        timeout
+                    ],
+                    "from": recipientAddress
+                }
+            }
+        }, done);
+    });
 
     it("Multi Channel balance should be 50 after transferring 50 tokens", async () => {
         const transfer = 50;
+        await ERC20Token.methods.approve(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.transfer(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
         await ERC20Token.methods.approve(MultiChannel.options.address, transfer).send({
-            from: nonChannelParticipant
+            from: userAddress
         });
         await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
-            from: nonChannelParticipant
+            from: userAddress
         });
-        const initialCreatorBalance = await ERC20Token.methods.balanceOf(nonChannelParticipant).call();
+
+        const initialCreatorBalance = await ERC20Token.methods.balanceOf(nonParticipantAddress).call();
         const stkchannelBalance = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
 
         assert.equal(stkchannelBalance.valueOf(), transfer, "MultiChannel should have 50 tokens after transfer but does not");
         assert.equal(initialCreatorBalance.valueOf(), (initialCreation - transfer).valueOf(), "Initial creator should have transferred amount of tokens removed from account");
-    })
+    });
 
     it("User should be allowed to close the channel with a valid signature just under amount deposited", async () => {
+        const transfer = 50;
+        await ERC20Token.methods.approve(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.transfer(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.approve(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
+        await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
+
+
         nonce++;
         const amount = 49;
         const returnToken = false;
-        const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, recipientAddressPk);
+        const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, recipientPk);
 
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, returnToken).send({
             from: userAddress
         });
+
         const data = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
         const closedNonce = data[indexes.CLOSED_NONCE];
@@ -104,8 +126,28 @@ contract("Testing Valid Transactions made by User", function () {
     });
 
     it("User should be allowed to contest the channel with valid signature equal to amount deposited", async () => {
+        const transfer = 50;
+        await ERC20Token.methods.approve(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.transfer(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.approve(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
+        await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
+        var amount = 2;
+
+        const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
+            from: recipientAddress
+        });
+
         nonce++;
-        const amount = 50;
+        amount = 50;
         const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, recipientPk);
 
         await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({
@@ -121,9 +163,31 @@ contract("Testing Valid Transactions made by User", function () {
     });
 
     it("User should be able to settle after time period with 0 tokens remaining in channel", async () => {
+        const transfer = 50;
+        await ERC20Token.methods.approve(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.transfer(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.approve(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
+        await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
+        nonce++;
+        var amount = 49;
+        const returnToken = false;
+        var cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, signersPk);
+
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, returnToken).send({
+            from: recipientAddress
+        });
+
         for (i = 0; i <= timeout; i++) {
             var transaction = {
-                from: nonChannelParticipant,
+                from: nonParticipantAddress,
                 to: userAddress,
                 gasPrice: 1000000000,
                 value: 2
@@ -158,21 +222,27 @@ contract("Testing Valid Transactions made by User", function () {
 
     it("User should be allowed to close the channel with a valid signature less than amount deposited", async () => {
         const transfer = 50;
+        await ERC20Token.methods.approve(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.transfer(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
         await ERC20Token.methods.approve(MultiChannel.options.address, transfer).send({
-            from: nonChannelParticipant
-        });
-        await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
-            from: nonChannelParticipant
-        });
-        nonce++;
-        const amount = 20;
-
-        const returnToken = false;
-        const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, recipientAddressPk);
-
-        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, returnToken).send({
             from: userAddress
         });
+        await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
+        nonce++;
+        var amount = 20;
+        const returnToken = false;
+        var cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, signersPk);
+
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, returnToken).send({
+            from: recipientAddress
+        });
+
         const data = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
         const closedNonce = data[indexes.CLOSED_NONCE];
@@ -183,9 +253,31 @@ contract("Testing Valid Transactions made by User", function () {
     });
 
     it("User should be allowed to settle channel with additional tokens remaining in the channel", async () => {
+        const transfer = 50;
+        await ERC20Token.methods.approve(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.transfer(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.approve(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
+        await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
+        nonce++;
+        var amount = 49;
+        const returnToken = false;
+        var cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, signersPk);
+
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, returnToken).send({
+            from: recipientAddress
+        });
+                
         for (i = 0; i <= timeout; i++) {
             var transaction = {
-                from: nonChannelParticipant,
+                from: nonParticipantAddress,
                 to: userAddress,
                 gasPrice: 1000000000,
                 value: 2
@@ -221,19 +313,25 @@ contract("Testing Valid Transactions made by User", function () {
 
     it("User can close a channel with just under deposited", async () => {
         const transfer = 50;
+        await ERC20Token.methods.approve(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.transfer(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
         await ERC20Token.methods.approve(MultiChannel.options.address, transfer).send({
-            from: nonChannelParticipant
+            from: userAddress
         });
         await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
-            from: nonChannelParticipant
+            from: userAddress
         });
         nonce++;
-        const amount = 49;
+        var amount = 49;
         const returnToken = false;
-        const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, recipientAddressPk);
+        var cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, signersPk);
 
         await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, returnToken).send({
-            from: userAddress
+            from: recipientAddress
         });
         const data = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
@@ -245,10 +343,31 @@ contract("Testing Valid Transactions made by User", function () {
     });
 
     it("User can update closed channel with amount equivalent to deposited", async () => {
+        const transfer = 50;
+        await ERC20Token.methods.approve(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.transfer(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.approve(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
+        await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
         nonce++;
-        const amount = 50;
+        var amount = 49;
         const returnToken = false;
-        const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, recipientPk);
+        var cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, signersPk);
+
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, returnToken).send({
+            from: recipientAddress
+        });
+                
+        nonce++;
+        amount = 50;
+        cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, recipientPk);
 
         await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({
             from: userAddress
@@ -263,9 +382,31 @@ contract("Testing Valid Transactions made by User", function () {
     });
 
     it("User can settle with funds returned back to user", async () => {
+        const transfer = 50;
+        await ERC20Token.methods.approve(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.transfer(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.approve(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
+        await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
+        nonce++;
+        var amount = 49;
+        const returnToken = false;
+        var cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, signersPk);
+
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, returnToken).send({
+            from: recipientAddress
+        });
+                        
         for (i = 0; i <= timeout; i++) {
             var transaction = {
-                from: nonChannelParticipant,
+                from: nonParticipantAddress,
                 to: userAddress,
                 gasPrice: 1000000000,
                 value: 2
@@ -297,36 +438,32 @@ contract("Testing Valid Transactions made by User", function () {
         assert.equal(parseInt(newChannelBalance.valueOf()), parseInt(oldChannelBalance.valueOf()) - parseInt(amountOwed.valueOf()), 'Unspent token should remain in the channel account');
         assert.equal(parseInt(newUserBalance.valueOf()), parseInt(oldUserBalance.valueOf()), 'The User address account value should remain the same');
     });
-
-    it("User can close channel with amount just under deposited", async () => {
+    
+    it("User can settle channel with funds returned", async () => {
         const transfer = 50;
+        await ERC20Token.methods.approve(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.transfer(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
         await ERC20Token.methods.approve(MultiChannel.options.address, transfer).send({
-            from: nonChannelParticipant
-        });
-        await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
-            from: nonChannelParticipant
-        });
-        nonce++;
-        const amount = 49;
-        const returnToken = true;
-        const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.options.address, recipientAddressPk);
-
-        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, returnToken).send({
             from: userAddress
         });
-        const data = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
+        await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
 
-        const closedNonce = data[indexes.CLOSED_NONCE];
-        const closedBlock = data[indexes.CLOSED_BLOCK];
+        var amount = 2;
 
-        assert.equal(parseInt(closedNonce), nonce, "Nonces should be equal");
-        assert.notEqual(parseInt(closedBlock), 0, "Closed block should not be set to 0");
-    });
+        const properClose = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
+        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, properClose.v, properClose.r, properClose.s, true).send({
+            from: recipientAddress
+        });
 
-    it("User can settle channel with funds returned", async () => {
         for (i = 0; i <= timeout; i++) {
             var transaction = {
-                from: nonChannelParticipant,
+                from: nonParticipantAddress,
                 to: userAddress,
                 gasPrice: 1000000000,
                 value: 2
@@ -376,9 +513,29 @@ contract("Testing Valid Transactions made by User", function () {
     });
 
     it("User settling funds must return after closeWithoutSig", async () => {
+        const transfer = 50;
+        await ERC20Token.methods.approve(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.transfer(userAddress, transfer).send({
+            from: nonParticipantAddress
+        });
+        await ERC20Token.methods.approve(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
+        await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
+            from: userAddress
+        });
+
+        var amount = 2;
+
+        await MultiChannel.methods.closeWithoutSignature(ERC20Token.options.address).send({
+            from: userAddress
+        });
+
         for (i = 0; i <= timeout; i++) {
             var transaction = {
-                from: nonChannelParticipant,
+                from: nonParticipantAddress,
                 to: userAddress,
                 gasPrice: 1000000000,
                 value: 2

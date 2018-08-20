@@ -9,69 +9,62 @@ const initialCreation = testConstant.INIT;
 const timeout = testConstant.TIMEOUT;
 let userAddress = allAccounts[0];
 let recipientAddress = allAccounts[1];
-let signerAddress = allAccounts[2];
+let signerAddress = allAccounts[2]; 
 let nonParticipantAddress = allAccounts[3];
+const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
+var nonce = 1;
 
-config({
-    "deployment": {
-        "accounts": [{
-            "mnemonic": testConstant.MNEMONIC,
-            "numAddresses": testConstant.NUM_ADDRESS,
-            "addressIndex": testConstant.INDEX,
-            "hdpath": testConstant.PATH
-        }]
-    },
-    contracts: {
-        "Token": {
-
-        },
-        "StandardToken": {
-
-        },
-        "WETHToken": {
-            args: [initialCreation, "WETH", 18, "STK"],
-            "instanceOf": "ERC20Token",
-            "from": nonParticipantAddress
-        },
-        "ThingToken": {
-            args: [initialCreation, "Thing", 18, "THG"],
-            "instanceOf": "ERC20Token",
-            "from": nonParticipantAddress
-        },
-        "ERC20Token": {
-            args: [initialCreation, 'STK', 18, 'STK'],
-            "from": nonParticipantAddress
-        },
-        MultiLibrary: {
-            args: [
-                '$ERC20Token',
-                '0xC6eA7fD8628672780dd4F17Ffda321AA6753134B',
-                signerAddress,
-                recipientAddress,
-                timeout,
-                1,
-                0,
-                0
-            ],
-            "from": recipientAddress
-        },
-        "MultiChannel": {
-            args: [
-                userAddress,
-                signerAddress,
-                '$ERC20Token',
-                timeout
-            ],
-            "from": recipientAddress
-        }
-    }
-});
-
-contract("Testing Users Adding Other Tokens", function () {
-    this.timeout(0);
-    const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
-    var nonce = 1;
-
+contract("Additional Token Tests", function () {
+    beforeEach((done) => {
+        config({
+            "deployment": {
+                "accounts": [{
+                    "mnemonic": testConstant.MNEMONIC,
+                    "numAddresses": testConstant.NUM_ADDRESS,
+                    "addressIndex": testConstant.INDEX,
+                    "hdpath": testConstant.PATH
+                }]
+            },
+            contracts: {
+                "WETHToken": {
+                    args: [initialCreation, "WETH", 18, "STK"],
+                    "instanceOf": "ERC20Token",
+                    "from": nonParticipantAddress
+                },
+                "ThingToken": {
+                    args: [initialCreation, "Thing", 18, "THG"],
+                    "instanceOf": "ERC20Token",
+                    "from": nonParticipantAddress
+                },
+                "ERC20Token": {
+                    args: [initialCreation, 'STK', 18, 'STK'],
+                    "from": nonParticipantAddress
+                },
+                MultiLibrary: {
+                    args: [
+                        '$ERC20Token',
+                        '0xC6eA7fD8628672780dd4F17Ffda321AA6753134B',
+                        signerAddress,
+                        recipientAddress,
+                        timeout,
+                        1,
+                        0,
+                        0
+                    ],
+                    "from": recipientAddress
+                },
+                "MultiChannel": {
+                    args: [
+                        userAddress,
+                        signerAddress,
+                        '$ERC20Token',
+                        timeout
+                    ],
+                    "from": recipientAddress
+                }
+            }
+        }, done);
+    });
     it("Non channel participant should not be able to add tokens", async () => {
         try {
             await MultiChannel.methods.addChannel(WETHToken.options.address, userAddress, recipientAddress, 10).send({
@@ -103,6 +96,9 @@ contract("Testing Users Adding Other Tokens", function () {
     })
 
     it("User should not be able to add duplicate tokens", async () => {
+        await MultiChannel.methods.addChannel(ThingToken.options.address, userAddress, recipientAddress, 10).send({
+            from: recipientAddress
+        });        
         try {
             await MultiChannel.methods.addChannel(ThingToken.options.address, userAddress, recipientAddress, 10).send({
                 from: userAddress
@@ -114,6 +110,9 @@ contract("Testing Users Adding Other Tokens", function () {
     })
 
     it("Recipient Address should not be able to add duplicate tokens", async () => {
+        await MultiChannel.methods.addChannel(ThingToken.options.address, userAddress, recipientAddress, 10).send({
+            from: recipientAddress
+        });         
         try {
             await MultiChannel.methods.addChannel(ThingToken.options.address, userAddress, recipientAddress, 10).send({
                 from: recipientAddress
