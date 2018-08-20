@@ -6,5 +6,12 @@ deployedAddress.json
 bin/
 .embark/* 
 chains.json  
-test/helpers/testConstant.js 
-.gitignore
+test/helpers/testConstant.js  
+config/communication.js 
+config/namesystem.js 
+config/storage.js 
+config/webserver.js 
+app/* 
+config/blockchain.js 
+config/development/* 
+config/testnet/* 
