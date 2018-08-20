@@ -7,7 +7,6 @@ let nonParticipantAddress = allAccounts[3];
 let userAddress = allAccounts[0];
 let recipientAddress = allAccounts[1];
 let signerAddress = allAccounts[2];
-let nonParticipantAddress = allAccounts[3];
 config({
     "deployment": {
         "accounts": [{
