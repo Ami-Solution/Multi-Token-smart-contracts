@@ -1,103 +1,95 @@
 # Tests to Add:
 
-## NonChannelParticipant
+## NonChannelParticipant Test
 
-* non channel participant closing an open channel w/ valid sig
-* non channel participant closing an open channel w/ invalid sig
-* non channel participant contesting an open channel w/ valid sig
-* non channel participant contesting an open channel w/ invalid sig
-* non channel participant calling closeWithoutSig on open channel
-* non channel participant settling an open channel w/ valid sig
-* non channel participant closing a closed channel w/ valid sig
-* non channel participant closing a closed channel w/ invalid sig
-* non channel participant calling closeWithoutSig on closed channel
-* non channel participant contesting a closed channel w/ valid sig
-* non channel participant contesting a closed channel w/ invalid sig
-* non channel participant settling a closed channel 
+### Open Channels
+* cannot close channel open channel with valid signature  
+* cannot close open channel with invalid signature 
+* cannot close open channel without signature   
+* cannot close a closed channel without signature  
+* cannot contest an open channel with valid signature 
+* cannot contest an open channel with invalid signature 
+* cannot settle open channel 
 
-## IllegalStateTransition
+### Closed Channels 
+* cannot close a closed channel with valid signature 
+* cannot close a closed channel with an invalid signature 
+* cannot close without signature on a closed channel 
+* cannot contest closed channel with valid signature 
+* cannot contest closed channel with invalid signature 
+* cannot contest channel with valid signature after timeout 
+* cannot contest channel with invalid signature past timeout 
+* cannot settle a closed channel 
 
-* Recipient Address: should not update an open channel
-* User: should not update an open channel
-* Recipient Address: should not settle an open channel
-* User: should not settle an open channel 
-* User: cannot close channel with amount greater than deposited 
-* Recipient Address: cannot close channel with amount greater than deposited
-* User: cannot close channel with user-address-signed signature
-* Recipient Address: cannot close a channel with a Recipient Address-signed signature 
+## IllegalStateTransition Tests 
 
-* User: should not be able to closeWithoutSignature on an open channel 
-* Recipient Address: should not be be able to closeWithoutSignature on an open channel 
+### Open Channels
+* User should not be able to update an open channel 
+* Recipient should not be able to update an open channel 
+* User should not be able to contest an open channel 
+* Recipient should not be able to contest an open channel 
+* User should not be able to settle an open channel 
+* Recipient should not be able to settle an open channel 
 
-* User: cannot use same nonce for contesting channel 
-* Recipient Address: cannot use same nonce for contesting channel
-* User: cannot use same nonce as previously used to close
-* Recipient Address:cannot use same nonce as previously used to close 
-* Recipient Address: cannot close a closed channel 
-* User: cannot close a closed channel 
-* User: cannot update a closed channel with amount > deposited
-* Recipient Address: cannot update a closed channel with amount > deposited
-* User: cannot settle the channel before the time period
-* Recipient Address: cannot settle the channel before the time period
+### Closing Channels 
+* User cannot close channel with amount greater than deposited  
+* Recipient cannot close channel with amount greater than deposited
+* User cannot close channel with signer signed transaction  
+* Recipient cannot close channel with address-signed transaction  
+* Recipient cannot close with amount greater than deposited  
+* User cannot close with self-signed signature
+* Recipient cannot sign with self-signed signature 
 
-## AdditionalToken
+### Contesting 
+* User cannot use the same nonce for contesting a channel 
+* Recipient address cannot use the same nonce for contesting a channel  
+* User cannot contest an amount greater than deposited 
+* Recipient cannot contest amount greater than deposited 
+* User cannot contest with self-signed signature 
+* Recipient cannot contest with self-signed signature  
+* User should not be able to contest after time period is over 
+* Recipient should not be able to contest after time period is over 
 
-* Non channel participant: should not be able to add tokens
-* User: cannot add tokens
-* Recipient Address should be able to add tokens
-* User: cannot add a duplicate token
-* Recipient Address: cannot add a duplicate token
-* User: cannot close an uninitialized channel
-* Recipient Address: cannot close an uninitialized channel
-* User: cannot settle an uninitialized channel
-* Recipient Address: cannot settle an uninitialized channel
-* Should revert if attempting to add non-ERC20 token
+### Closed Channels 
+* User cannot close a closed channel 
+* Recipient cannot close a closed channel 
+* User cannot close without signature on a closed channel 
+* Recipient cannot close without signature on a closed channel  
 
-## User Valid Transactions  
+### Settling 
+* User should not be able to settle before time period is over 
+* Recipient should not be able to settle before time period is over   
 
-* User: close channel with amount just under deposited
-* User: updates closed channel w/ amount equal to deposited 
-* User: settles channel with funds remaining inside (equivalent to 0)
+## AdditionalToken Tests 
 
---
+### Non Channel Participants  
+* Should not be able to add tokens 
 
-* User: close channel with amount less than deposited 
-* User: settles channel with funds remaining inside (>0) 
+### Recipient Address  
+* Should be able to add tokens 
+* Should not be able to add duplicate tokens 
+* Cannot close an uninitiialized channel 
+* Cannot settle an uninitialized channel
 
---
+### User Address 
+* Should not be able to add tokens  
+* Should not be able to add duplicate tokens  
+* Cannot close an uninitialized channel 
+* Cannot settle an uninitialized channel
 
-* User: close channel with amount just under deposited
-* User: updates closed channel w/ amount equal to deposited 
-* User: settles with funds not remaining inside (equivalent to 0) 
+## Recipient Valid Transactions Tests 
 
---
+### Setting up Payment Channel
+* Can iniitalize multichannel balance 
 
-* User: closes channel with amount just under deposited 
-* User: settles channel with funds returned 
+### Closing Channel 
+* Can close channel with valid signature with amountDeposited-1   
+* Can close channel with valid signature less than amountDeposited
 
--- 
+### Contesting Channel
+* Should be able to contest the channel with valid sig with amountDeposited  
 
-* Insert 50 tokens into the channel 
-* Close without signature 
-
-## Recipient Address Valid Transactions 
-
-* Recipient Address: closes channel with amount less than deposited 
-* Recipient Address: contests channel with amount equivalent to deposited 
-* Recipient Address: settles channel with funds remaining inside (equivalent to 0) 
-
---
-
-* Recipient Address: closes channel with amount less than deposited 
-* Recipient Address: contests channel with amount equivalent to deposited 
-* Recipient Address: settles channel with funds not remaining inside (equivalent to 0) 
-
---
-
-* Recipient Address: closes channel with amount less than deposited
-* Recipient Address: settles channel with funds remaining in channel 
-
---
-
-* Recipient Address: closes channel with amount less than deposited
-* Recipient Address: settles channel with funds not remaining in channel 
+### Settling a Channel 
+* Should be able to settle after time period with no tokens remaining in the token  
+* Should be allowed to settle channel with tokens remaining in channel 
+* 

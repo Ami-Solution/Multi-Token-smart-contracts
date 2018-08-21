@@ -132,7 +132,7 @@ contract("Illegal State Transition", function () {
         }
     })
 
-    it("Recipient Address should not be able to update an open channel", async () => {
+    it("Recipient Address should not be able to settle an open channel", async () => {
         try {
             await MultiChannel.methods.settle(ERC20Token.options.address).send({
                 from: recipientAddress
@@ -167,13 +167,11 @@ contract("Illegal State Transition", function () {
             await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, true).send({
                 from: userAddress
             });
-            const dataAfter = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
             assert.fail("User cannot close channel with signer address");
         } catch (error) {
             assertRevert(error);
         }
     });
-
     it("Recipient Address cannot close channel with amount greater than deposited", async () => {
 
         amount = 150;

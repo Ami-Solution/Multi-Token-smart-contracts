@@ -283,43 +283,6 @@ contract("Non Channel Participant Actions", function () {
         }
     })
 
-    it("Cannot close a closed channel with invalid signature", async () => {
-        const transfer = 50;
-        await ERC20Token.methods.approve(userAddress, transfer).send({
-            from: nonParticipantAddress
-        });
-        await ERC20Token.methods.transfer(userAddress, transfer).send({
-            from: nonParticipantAddress
-        });
-        await ERC20Token.methods.approve(MultiChannel.options.address, transfer).send({
-            from: userAddress
-        });
-        await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
-            from: userAddress
-        });
-
-        let amount = 2;
-
-        const validSig = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
-        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, validSig.v, validSig.r, validSig.s, true).send({
-            from: recipientAddress
-        });
-
-        nonce++;
-        amount = 2;
-
-        const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
-
-        try {
-            await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, true).send({
-                from: nonParticipantAddress
-            });
-            assert.fail("Improperly signed signature should not be able to close an already closed channel");
-        } catch (error) {
-            assertRevert(error);
-        }
-    });
-
     it("Cannot contest channel with valid signature", async () => {
         const transfer = 50;
         await ERC20Token.methods.approve(userAddress, transfer).send({
@@ -357,43 +320,6 @@ contract("Non Channel Participant Actions", function () {
         }
     });
 
-    it("Cannot contest channel with valid signature", async () => {
-        const transfer = 50;
-        await ERC20Token.methods.approve(userAddress, transfer).send({
-            from: nonParticipantAddress
-        });
-        await ERC20Token.methods.transfer(userAddress, transfer).send({
-            from: nonParticipantAddress
-        });
-        await ERC20Token.methods.approve(MultiChannel.options.address, transfer).send({
-            from: userAddress
-        });
-        await ERC20Token.methods.transfer(MultiChannel.options.address, transfer).send({
-            from: userAddress
-        });
-
-        let amount = 2;
-
-        const validSig = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
-        await MultiChannel.methods.close(ERC20Token.options.address, nonce, amount, validSig.v, validSig.r, validSig.s, true).send({
-            from: recipientAddress
-        });
-
-        nonce++;
-        amount = 2;
-
-        const cryptoParams = closingHelper.getClosingParameters(ERC20Token.options.address, nonce, amount, MultiChannel.address, signersPk);
-
-        try {
-            await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({
-                from: nonParticipantAddress
-            });
-            assert.fail("Should not be able to contest channel with invalid signature");
-        } catch (error) {
-            assertRevert(error);
-        }
-    });
-
     it("Cannot contest channel with invalid signature", async () => {
         const transfer = 50;
         await ERC20Token.methods.approve(userAddress, transfer).send({
@@ -425,7 +351,7 @@ contract("Non Channel Participant Actions", function () {
             await MultiChannel.methods.updateClosedChannel(ERC20Token.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s).send({
                 from: nonParticipantAddress
             });
-            assert.fail("Non channel participant should not be able to contest");
+            assert.fail("Should not be able to contest channel with invalid signature");
         } catch (error) {
             assertRevert(error);
         }
