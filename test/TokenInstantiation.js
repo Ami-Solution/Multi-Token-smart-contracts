@@ -234,65 +234,67 @@ contract("Token Instantiation Tests", function () {
         assert.ok(undefinedTokenState[indexes.TIMEOUT].toString(),0,"Timeout should be undefined"); 
     });
 
-    // it("Testing 500 subchannels", async () => {
-    //     let channelAddress = [];
-    //     for (let i = 0; i < 500; i++) {
-    //         let publicAddress = generateEcKeys();
-    //         channelAddress.push(publicAddress);
-    //     }
+    /**
+    it("Testing 500 subchannels", async () => {
+        let channelAddress = [];
+        for (let i = 0; i < 500; i++) {
+            let publicAddress = generateEcKeys();
+            channelAddress.push(publicAddress);
+        }
 
-    //     for (let i = 0; i < channelAddress.length; i++) {
-    //         let currentAddress = channelAddress[i];
-    //         await MultiChannel.methods.addChannel(currentAddress, userAddress, recipientAddress, 10).send({
-    //             from: recipientAddress
-    //         });
-    //     }
+        for (let i = 0; i < channelAddress.length; i++) {
+            let currentAddress = channelAddress[i];
+            await MultiChannel.methods.addChannel(currentAddress, userAddress, recipientAddress, 10).send({
+                from: recipientAddress
+            });
+        }
 
-    //     for (let i = 0; i < channelAddress.length; i++) {
-    //         let currentAddress = channelAddress[i];
-    //         const data = await MultiChannel.methods.getChannelData(currentAddress).call();
-    //         assert.ok(data[indexes.USER_ADDRESS].toString(), userAddress, "User for respective address should be equal");
-    //         assert.ok(data[indexes.SIGNER_ADDRESS].toString(), signerAddress, "Signer for respective address should be equal")
-    //         assert.ok(data[indexes.TIMEOUT].toString(), timeout, "Timeout should be equal to the one set");
-    //         assert.ok(data[indexes.CLOSED_BLOCK].toString(), 0, "Closed block should be 0");
-    //     }
+        for (let i = 0; i < channelAddress.length; i++) {
+            let currentAddress = channelAddress[i];
+            const data = await MultiChannel.methods.getChannelData(currentAddress).call();
+            assert.ok(data[indexes.USER_ADDRESS].toString(), userAddress, "User for respective address should be equal");
+            assert.ok(data[indexes.SIGNER_ADDRESS].toString(), signerAddress, "Signer for respective address should be equal")
+            assert.ok(data[indexes.TIMEOUT].toString(), timeout, "Timeout should be equal to the one set");
+            assert.ok(data[indexes.CLOSED_BLOCK].toString(), 0, "Closed block should be 0");
+        }
 
-    //     let otherAddress = generateEcKeys(); 
-    //     const undefinedTokenState = await MultiChannel.methods.getChannelData(otherAddress).call();     
-    //     assert.ok(undefinedTokenState[indexes.USER_ADDRESS].toString,0x0000000000000000000000000000000000000000, "User address for token should be undefined"); 
-    //     assert.ok(undefinedTokenState[indexes.SIGNER_ADDRESS].toString(),0x0000000000000000000000000000000000000000, "Signer address for token value should be undefined"); 
-    //     assert.ok(undefinedTokenState[indexes.CLOSED_BLOCK].toString(),0,"Closed block for token value should be 0"); 
-    //     assert.ok(undefinedTokenState[indexes.TIMEOUT].toString(),0,"Timeout should be undefined"); 
-    // });
+        let otherAddress = generateEcKeys(); 
+        const undefinedTokenState = await MultiChannel.methods.getChannelData(otherAddress).call();     
+        assert.ok(undefinedTokenState[indexes.USER_ADDRESS].toString,0x0000000000000000000000000000000000000000, "User address for token should be undefined"); 
+        assert.ok(undefinedTokenState[indexes.SIGNER_ADDRESS].toString(),0x0000000000000000000000000000000000000000, "Signer address for token value should be undefined"); 
+        assert.ok(undefinedTokenState[indexes.CLOSED_BLOCK].toString(),0,"Closed block for token value should be 0"); 
+        assert.ok(undefinedTokenState[indexes.TIMEOUT].toString(),0,"Timeout should be undefined"); 
+    });
 
-    // it("Testing 1000 subchannels", async () => {
-    //     let channelAddress = [];
-    //     for (let i = 0; i < 1000; i++) {
-    //         let publicAddress = generateEcKeys();
-    //         channelAddress.push(publicAddress);
-    //     }
+    it("Testing 1000 subchannels", async () => {
+        let channelAddress = [];
+        for (let i = 0; i < 1000; i++) {
+            let publicAddress = generateEcKeys();
+            channelAddress.push(publicAddress);
+        }
 
-    //     for (let i = 0; i < channelAddress.length; i++) {
-    //         let currentAddress = channelAddress[i];
-    //         await MultiChannel.methods.addChannel(currentAddress, userAddress, recipientAddress, 10).send({
-    //             from: recipientAddress
-    //         });
-    //     }
+        for (let i = 0; i < channelAddress.length; i++) {
+            let currentAddress = channelAddress[i];
+            await MultiChannel.methods.addChannel(currentAddress, userAddress, recipientAddress, 10).send({
+                from: recipientAddress
+            });
+        }
 
-    //     for (let i = 0; i < channelAddress.length; i++) {
-    //         let currentAddress = channelAddress[i];
-    //         const data = await MultiChannel.methods.getChannelData(currentAddress).call();
-    //         assert.ok(data[indexes.USER_ADDRESS].toString(), userAddress, "User for respective address should be equal");
-    //         assert.ok(data[indexes.SIGNER_ADDRESS].toString(), signerAddress, "Signer for respective address should be equal")
-    //         assert.ok(data[indexes.TIMEOUT].toString(), timeout, "Timeout should be equal to the one set");
-    //         assert.ok(data[indexes.CLOSED_BLOCK].toString(), 0, "Closed block should be 0");
-    //     }
+        for (let i = 0; i < channelAddress.length; i++) {
+            let currentAddress = channelAddress[i];
+            const data = await MultiChannel.methods.getChannelData(currentAddress).call();
+            assert.ok(data[indexes.USER_ADDRESS].toString(), userAddress, "User for respective address should be equal");
+            assert.ok(data[indexes.SIGNER_ADDRESS].toString(), signerAddress, "Signer for respective address should be equal")
+            assert.ok(data[indexes.TIMEOUT].toString(), timeout, "Timeout should be equal to the one set");
+            assert.ok(data[indexes.CLOSED_BLOCK].toString(), 0, "Closed block should be 0");
+        }
 
-    //     let otherAddress = generateEcKeys(); 
-    //     const undefinedTokenState = await MultiChannel.methods.getChannelData(otherAddress).call();     
-    //     assert.ok(undefinedTokenState[indexes.USER_ADDRESS].toString,0x0000000000000000000000000000000000000000, "User address for token should be undefined"); 
-    //     assert.ok(undefinedTokenState[indexes.SIGNER_ADDRESS].toString(),0x0000000000000000000000000000000000000000, "Signer address for token value should be undefined"); 
-    //     assert.ok(undefinedTokenState[indexes.CLOSED_BLOCK].toString(),0,"Closed block for token value should be 0"); 
-    //     assert.ok(undefinedTokenState[indexes.TIMEOUT].toString(),0,"Timeout should be undefined"); 
-    // });
+        let otherAddress = generateEcKeys(); 
+        const undefinedTokenState = await MultiChannel.methods.getChannelData(otherAddress).call();     
+        assert.ok(undefinedTokenState[indexes.USER_ADDRESS].toString,0x0000000000000000000000000000000000000000, "User address for token should be undefined"); 
+        assert.ok(undefinedTokenState[indexes.SIGNER_ADDRESS].toString(),0x0000000000000000000000000000000000000000, "Signer address for token value should be undefined"); 
+        assert.ok(undefinedTokenState[indexes.CLOSED_BLOCK].toString(),0,"Closed block for token value should be 0"); 
+        assert.ok(undefinedTokenState[indexes.TIMEOUT].toString(),0,"Timeout should be undefined"); 
+    });
+     */
 });
