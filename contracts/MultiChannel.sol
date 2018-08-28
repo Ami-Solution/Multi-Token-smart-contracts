@@ -153,6 +153,7 @@ contract MultiChannel
         external
     {
         wrappedETH = WETH(_addressOfToken);
+        channels[_addressOfToken].token_ = ERC20Token(_addressOfToken);
         channels[_addressOfToken].addChannel(_from,_addressOfSigner,_expiryNumberOfBlocks);
     }
 

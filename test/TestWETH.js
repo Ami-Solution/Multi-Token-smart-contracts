@@ -18,7 +18,7 @@ const userPk = Buffer.from(testConstant.USER_PK, 'hex');
 const recipientPk = Buffer.from(testConstant.RECIPIENT_PK, 'hex');
 let nonce = 1;
 
-contract("Illegal State Transition", function () {
+contract("Testing WETH", function () {
     beforeEach((done) => {
         config({
             "deployment": {
@@ -93,6 +93,59 @@ contract("Illegal State Transition", function () {
         assert.equal(channelBalance, 1000000000000000000, "WETH token should have 1000000000000000000 tokens");
         assert.equal(channelEth, 0, "ETH balance should not be in channel");
         assert.equal(tokenContract, 1000000000000000000, "WETH should have 1 ETH balance");
+    })
+
+    it("Should be able to close WETH channel", async () => {
+        await MultiChannel.methods.addWETH(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await MultiChannel.methods.deposit(WETH.options.address).send({
+            from: userAddress,
+            value: '1000000000000000000'
+        });
+
+        const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
+
+        nonce++;
+        const amount = 49;
+        const returnToken = false;
+        const cryptoParams = closingHelper.getClosingParameters(WETH.options.address, nonce, amount, MultiChannel.options.address, recipientPk);
+
+        await MultiChannel.methods.close(WETH.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, returnToken).send({
+            from: userAddress
+        });
+
+        const dataAfter = await MultiChannel.methods.getChannelData(WETH.options.address).call();
+        assert.ok(dataAfter[indexes.AMOUNT_OWED], amount, "Amount owed should be set");
+        assert.ok(dataAfter[indexes.CLOSED_BLOCK] > 0, "Closed block should be set");
+    })
+
+    it("Should be able to close without signature with ETH", async () => {
+        await MultiChannel.methods.addWETH(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await MultiChannel.methods.deposit(WETH.options.address).send({
+            from: userAddress,
+            value: '1000000000000000000'
+        });
+
+        const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
+
+        nonce++;
+        const amount = 49;
+        const returnToken = false;
+
+        await MultiChannel.methods.closeWithoutSignature(WETH.options.address).send({
+            from: userAddress
+        });
+
+        const dataAfter = await MultiChannel.methods.getChannelData(WETH.options.address).call();
+
+        assert.equal(data[indexes.TIMEOUT], 10, "Timeout is equivalent");
+        assert.ok(dataAfter[indexes.CLOSED_BLOCK] > 0, "Closed block should be set");
+        assert.ok(dataAfter[indexes.AMOUNT_OWED], amount, "Amount owed should be set");
     })
 
 });
