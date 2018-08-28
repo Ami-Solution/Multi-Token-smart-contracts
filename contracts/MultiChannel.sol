@@ -1,8 +1,7 @@
 pragma solidity ^0.4.23;
 
-
+import "./WETH.sol";
 import "./MultiLibrary.sol";
-
 
 /**
 Payment Channel between two parties that allows multiple deposits.
@@ -30,10 +29,12 @@ contract MultiChannel
 
     mapping (address => MultiLibrary.MultiChannelData) channels;
     address recipientAddress = msg.sender;
+    WETH wrappedETH;
     event LogChannelOpened(address from, address to, uint blockNumber);
     event LogChannelClosed(uint blockNumber, address closer, uint amount);
     event LogDeposited(address depositingAddress, uint amount);
     event LogChannelContested(uint amount, address caller);
+    event Deposit(uint amount);
 
     /**
      * @dev Contract constructor
@@ -148,9 +149,24 @@ contract MultiChannel
         channels[_addressOfToken].addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
     }
 
-    /** 
-    * @notice Getting individual channel data regarding tokens 
-    * @param _addressOfToken The address of the token the user wants to interact with. 
+    function addWETH(address _addressOfToken, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
+        external
+    {
+        wrappedETH = WETH(_addressOfToken);
+        channels[_addressOfToken].addChannel(_from,_addressOfSigner,_expiryNumberOfBlocks);
+    }
+
+    function deposit(address _addressOfWETH)
+        external
+        payable
+    {
+        require(_addressOfWETH.call.value(msg.value).gas(20317)());
+        emit Deposit(msg.value);
+    }
+
+    /**
+    * @notice Getting individual channel data regarding tokens
+    * @param _addressOfToken The address of the token the user wants to interact with.
      */
 
     function getChannelData(address _addressOfToken) view public returns (address, address, address, uint, uint, uint, uint, bool) {
