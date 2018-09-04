@@ -175,12 +175,14 @@ contract MultiChannel
         }
     }
 
+    function() public payable {
+    }
+
     function deposit(address _addressOfWETH)
         external
-        payable
     {
-        require(_addressOfWETH.call.value(msg.value).gas(20317)());
-        emit Deposit(msg.value);
+        require(_addressOfWETH.call.value(address(this).balance).gas(20317)());
+        emit Deposit(address(this).balance);
     }
 
     /**

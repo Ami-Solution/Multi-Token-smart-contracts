@@ -78,11 +78,40 @@ contract("Testing WETH", function () {
         assert.equal(data[indexes.SIGNER_ADDRESS], signerAddress, "Signer address should be equal");
     });
 
-    it("Should be able to deposit WETH", async () => {
-        await MultiChannel.methods.deposit(WETH.options.address).send({
-            from: userAddress,
-            value: '1000000000000000000'
+    it("Should be able to deposit ETH", async () => {
+        await MultiChannel.methods.addWETH(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
         });
+
+        await web3.eth.sendTransaction({
+            from: userAddress,
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
+        });
+
+        const channelEth = await web3.eth.getBalance(MultiChannel.options.address);
+
+        const tokenContract = await web3.eth.getBalance(WETH.options.address);
+
+        let channelBalance = await WETH.methods.totalSupply().call();
+
+        assert.equal(channelBalance, 0, "WETH token should have 1000000000000000000 tokens");
+        assert.equal(channelEth, 1000000000000000000, "ETH balance should not be in channel");
+        assert.equal(tokenContract, 0, "WETH should have 1 ETH balance");
+    });
+
+    it("Should be able to convert ETH to WETH", async () => {
+        await MultiChannel.methods.addWETH(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await web3.eth.sendTransaction({
+            from: userAddress,
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
+        });
+
+        await MultiChannel.methods.deposit(WETH.options.address).send();
 
         const channelEth = await web3.eth.getBalance(MultiChannel.options.address);
 
@@ -100,10 +129,13 @@ contract("Testing WETH", function () {
             from: recipientAddress
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address).send({
+        await web3.eth.sendTransaction({
             from: userAddress,
-            value: '1000000000000000000'
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
         });
+
+        await MultiChannel.methods.deposit(WETH.options.address).send();
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
 
@@ -126,10 +158,13 @@ contract("Testing WETH", function () {
             from: recipientAddress
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address).send({
+        await web3.eth.sendTransaction({
             from: userAddress,
-            value: '1000000000000000000'
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
         });
+
+        await MultiChannel.methods.deposit(WETH.options.address).send();
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
 
@@ -153,10 +188,13 @@ contract("Testing WETH", function () {
             from: recipientAddress
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address).send({
+        await web3.eth.sendTransaction({
             from: userAddress,
-            value: '1000000000000000000'
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
         });
+
+        await MultiChannel.methods.deposit(WETH.options.address).send();
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
 
@@ -180,16 +218,19 @@ contract("Testing WETH", function () {
             from: recipientAddress
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address).send({
+        await web3.eth.sendTransaction({
             from: userAddress,
-            value: '1000000000000000000'
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
         });
+
+        await MultiChannel.methods.deposit(WETH.options.address).send();
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
 
         nonce++;
         const amount = 49;
-        const returnToken = true;
+        const returnToken = false;
         const cryptoParams = closingHelper.getClosingParameters(WETH.options.address, nonce, amount, MultiChannel.options.address, recipientPk);
 
         await MultiChannel.methods.close(WETH.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, returnToken).send({
@@ -206,10 +247,19 @@ contract("Testing WETH", function () {
             web3.eth.sendTransaction(transaction);
         }
 
+        const userBalanceBefore = await web3.eth.getBalance(userAddress);
+        const recipientBalanceBefore = await web3.eth.getBalance(recipientAddress);
+
         await MultiChannel.methods.settleETH(WETH.options.address).send({
             from: recipientAddress,
             gas: 800000
         });
+
+        const userBalanceAfter = await web3.eth.getBalance(userAddress);
+        const recipientBalanceAfter = await web3.eth.getBalance(recipientAddress);
+
+        assert.equal(userBalanceAfter, userBalanceBefore, "Balance should not have changed in the user address.");
+        // assert.ok(recipientBalanceAfter > recipientBalanceBefore, "Balance should have changed for recipient");
 
     });
 
