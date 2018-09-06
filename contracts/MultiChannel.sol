@@ -1,8 +1,8 @@
 pragma solidity ^0.4.23;
 
-
+import "./SafeMathLib.sol";
+import "./WETH.sol";
 import "./MultiLibrary.sol";
-
 
 /**
 Payment Channel between two parties that allows multiple deposits.
@@ -10,18 +10,19 @@ Once closed, there is a contest period which allows state updates.
 */
 contract MultiChannel
 {
+    using SafeMathLib for uint;
     using MultiLibrary for MultiLibrary.MultiChannelData;
 
-    modifier channelExists(address addressOfToken) 
-    { 
+    modifier channelExists(address addressOfToken)
+    {
         require(channels[addressOfToken].timeout_ > uint(0));
         _;
     }
 
-    modifier channelDoesNotExist(address addressOfToken) 
-    { 
+    modifier channelDoesNotExist(address addressOfToken)
+    {
         require(channels[addressOfToken].timeout_ <= uint(0));
-        _; 
+        _;
     }
 
     /**
@@ -30,10 +31,12 @@ contract MultiChannel
 
     mapping (address => MultiLibrary.MultiChannelData) channels;
     address recipientAddress = msg.sender;
+    WETH wrappedETH;
     event LogChannelOpened(address from, address to, uint blockNumber);
     event LogChannelClosed(uint blockNumber, address closer, uint amount);
     event LogDeposited(address depositingAddress, uint amount);
     event LogChannelContested(uint amount, address caller);
+    event Deposit(uint amount);
 
     /**
      * @dev Contract constructor
@@ -61,13 +64,13 @@ contract MultiChannel
 
     /**
     * @notice Function to close the payment channel.
-    * @param _addressOfToken The address of the token the user wants to interact with. 
+    * @param _addressOfToken The address of the token the user wants to interact with.
     * @param _nonce The nonce of the deposit. Used for avoiding replay attacks.
     * @param _amount The amount of tokens claimed to be due to the receiver.
     * @param _v Cryptographic param v derived from the signature.
     * @param _r Cryptographic param r derived from the signature.
     * @param _s Cryptographic param s derived from the signature.
-    * @param _returnToken Determines to/to not return funds to user after settle. 
+    * @param _returnToken Determines to/to not return funds to user after settle.
     */
     function close(
         address _addressOfToken,
@@ -87,7 +90,7 @@ contract MultiChannel
 
     /**
     * @notice Function to close the payment channel without a signature.
-    * @param _addressOfToken The address of the token the user wants to interact with. 
+    * @param _addressOfToken The address of the token the user wants to interact with.
     */
     function closeWithoutSignature(
         address _addressOfToken)
@@ -100,7 +103,7 @@ contract MultiChannel
 
     /**
     * @notice Function to contest the closing state of the payment channel. Will be able to be called for a time period (in blocks) given by timeout after closing of the channel.
-    * @param _addressOfToken The address of the token the user wants to interact with. 
+    * @param _addressOfToken The address of the token the user wants to interact with.
     * @param _nonce The nonce of the deposit. Used for avoiding replay attacks.
     * @param _amount The amount of tokens claimed to be due to the receiver.
     * @param _v Cryptographic param v derived from the signature.
@@ -123,21 +126,21 @@ contract MultiChannel
 
     /**
     * @notice After the timeout of the channel after closing has passed, can be called by either participant to withdraw funds.
-    * @param _addressOfToken The address of the multichannel to interact with. 
+    * @param _addressOfToken The address of the multichannel to interact with.
     */
     function settle( address _addressOfToken)
         external
-        channelExists(_addressOfToken)        
+        channelExists(_addressOfToken)
     {
         channels[_addressOfToken].settle(address(this));
     }
 
     /**
     * @notice Adding new tokens to the respective channel
-    * @param _addressOfToken The address of the token the user wants to interact with. 
-    * @param _from The address of the user. After the settle, the funds will be returned here. 
-    * @param _addressOfSigner The addres of the signer. 
-    * @param _expiryNumberOfBlocks The timeout period for the given channel. 
+    * @param _addressOfToken The address of the token the user wants to interact with.
+    * @param _from The address of the user. After the settle, the funds will be returned here.
+    * @param _addressOfSigner The addres of the signer.
+    * @param _expiryNumberOfBlocks The timeout period for the given channel.
     */
     function addChannel(address _addressOfToken, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
         external
@@ -148,9 +151,28 @@ contract MultiChannel
         channels[_addressOfToken].addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
     }
 
-    /** 
-    * @notice Getting individual channel data regarding tokens 
-    * @param _addressOfToken The address of the token the user wants to interact with. 
+    function addWETH(address _addressOfToken, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
+        external
+    {
+        wrappedETH = WETH(_addressOfToken);
+        channels[_addressOfToken].token_ = ERC20Token(_addressOfToken);
+        channels[_addressOfToken].addChannel(_from,_addressOfSigner,_expiryNumberOfBlocks);
+    }
+
+    function() public payable {
+    }
+
+    function deposit(address _addressOfWETH, uint gasAmount)
+    external
+    channelExists(_addressOfWETH)
+    {
+        require(_addressOfWETH.call.value(address(this).balance).gas(gasAmount)());
+        emit Deposit(address(this).balance);
+    }
+
+    /**
+    * @notice Getting individual channel data regarding tokens
+    * @param _addressOfToken The address of the token the user wants to interact with.
      */
 
     function getChannelData(address _addressOfToken) view public returns (address, address, address, uint, uint, uint, uint, bool) {
@@ -161,7 +183,7 @@ contract MultiChannel
         channel.timeout_,
         channel.amountOwed_,
         channel.closedBlock_,
-        channel.closedNonce_, 
+        channel.closedNonce_,
         channel.shouldReturn_);
     }
 }
