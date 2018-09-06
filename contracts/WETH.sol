@@ -32,8 +32,8 @@ contract WETH {
     deposit();
   }
 
-  function balance() public view returns(uint) {
-    return balanceOf[msg.sender];
+  function balanceOf(address channelAddress) public view returns(uint) {
+    return balanceOf[channelAddress];
   }
 
   function deposit() public payable {
@@ -58,13 +58,10 @@ contract WETH {
     return true;
   }
 
-  // function transfer(address dst, uint wad) public returns(bool) {
-  //   return transferFrom(msg.sender, dst, wad);
-  // }
-
   function transfer(address dst, uint wad) public returns(bool) {
     transferFrom(msg.sender, dst, wad);
     dst.transfer(wad);
+    return true;
   }
 
   function transferFrom(address src, address dst, uint wad)

@@ -5,7 +5,8 @@ const closingHelper = require('./helpers/channelClosingHelper');
 const WETH = require('Embark/contracts/WETH');
 const assertRevert = require('./helpers/assertRevert');
 const testConstant = require('./helpers/testConstant');
-const indexes = require('./helpers/ChannelDataIndexes.js')
+const indexes = require('./helpers/ChannelDataIndexes.js');
+const BigNumber = require('bignumber.js');
 const allAccounts = testConstant.ACCOUNTS;
 const initialCreation = testConstant.INIT;
 const timeout = 1;
@@ -213,7 +214,7 @@ contract("Testing WETH", function () {
         assert.ok(dataAfter[indexes.AMOUNT_OWED], amount, "Amount owed should be set");
     });
 
-    it("Should be able to settle with ETH", async () => {
+    it("Should be able to settle with ETH with tokens not returned back to the user", async () => {
         await MultiChannel.methods.addWETH(WETH.options.address, userAddress, signerAddress, timeout).send({
             from: recipientAddress
         });
@@ -247,20 +248,83 @@ contract("Testing WETH", function () {
             web3.eth.sendTransaction(transaction);
         }
 
-        const userBalanceBefore = await web3.eth.getBalance(userAddress);
-        const recipientBalanceBefore = await web3.eth.getBalance(recipientAddress);
+        let userBalanceBefore = new BigNumber(await web3.eth.getBalance(userAddress));
+        let recipientBalanceBefore = new BigNumber(await web3.eth.getBalance(recipientAddress));
 
-        await MultiChannel.methods.settleETH(WETH.options.address).send({
+        let txhash = await MultiChannel.methods.settle(WETH.options.address).send({
             from: recipientAddress,
-            gas: 800000
+            gas: 800000,
+            gasPrice: 1000
         });
 
-        const userBalanceAfter = await web3.eth.getBalance(userAddress);
-        const recipientBalanceAfter = await web3.eth.getBalance(recipientAddress);
+        let gasUsed = txhash['cumulativeGasUsed'];
 
-        assert.equal(userBalanceAfter, userBalanceBefore, "Balance should not have changed in the user address.");
-        // assert.ok(recipientBalanceAfter > recipientBalanceBefore, "Balance should have changed for recipient");
+        const userBalanceAfter = new BigNumber(await web3.eth.getBalance(userAddress));
+        const recipientBalanceAfter = new BigNumber(await web3.eth.getBalance(recipientAddress));
 
+        recipientBalanceBefore = recipientBalanceBefore.plus(amount);
+        recipientBalanceBefore = recipientBalanceBefore.minus(1000 * gasUsed);
+
+        assert.ok(userBalanceAfter.isEqualTo(userBalanceBefore), "Balance should not have changed in the user address.");
+        assert.ok(recipientBalanceBefore.isEqualTo(recipientBalanceAfter), "Recipient should get amountOwed");
+    });
+
+    it("Should be able to settle with ETH returned back to the user", async () => {
+        await MultiChannel.methods.addWETH(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await web3.eth.sendTransaction({
+            from: userAddress,
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
+        });
+
+        await MultiChannel.methods.deposit(WETH.options.address).send();
+
+        const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
+
+        nonce++;
+        const amount = 49;
+        const returnToken = true;
+        const cryptoParams = closingHelper.getClosingParameters(WETH.options.address, nonce, amount, MultiChannel.options.address, signersPk);
+
+        await MultiChannel.methods.close(WETH.options.address, nonce, amount, cryptoParams.v, cryptoParams.r, cryptoParams.s, returnToken).send({
+            from: recipientAddress
+        });
+
+        for (i = 0; i <= timeout; i++) {
+            let transaction = {
+                from: nonParticipantAddress,
+                to: signerAddress,
+                gasPrice: 1000000000,
+                value: 2
+            };
+            web3.eth.sendTransaction(transaction);
+        }
+
+        let userBalanceBefore = new BigNumber(await web3.eth.getBalance(userAddress));
+        let recipientBalanceBefore = new BigNumber(await web3.eth.getBalance(recipientAddress));
+
+        const txhash = await MultiChannel.methods.settle(WETH.options.address).send({
+            from: recipientAddress,
+            gas: 800000,
+            gasPrice: 1000
+        });
+
+        let gasUsed = txhash['cumulativeGasUsed'];
+
+        const userBalanceAfter = new BigNumber(await web3.eth.getBalance(userAddress));
+        const recipientBalanceAfter = new BigNumber(await web3.eth.getBalance(recipientAddress));
+
+        recipientBalanceBefore = recipientBalanceBefore.plus(amount);
+        recipientBalanceBefore = recipientBalanceBefore.minus(1000 * gasUsed);
+
+        userBalanceBefore = userBalanceBefore.plus(1000000000000000000);
+        userBalanceBefore = userBalanceBefore.minus(amount);
+
+        assert.ok(userBalanceBefore.isEqualTo(userBalanceAfter), "Balance should have changed in the user address.");
+        assert.ok(recipientBalanceBefore.isEqualTo(recipientBalanceAfter), "Recipient should get amountOwed");
     });
 
 });

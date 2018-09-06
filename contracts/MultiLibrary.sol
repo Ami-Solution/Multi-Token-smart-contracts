@@ -2,6 +2,7 @@ pragma solidity ^ 0.4 .23;
 
 import "./ERC20Token.sol";
 import "./SafeMathLib.sol";
+import "./WETH.sol";
 
 library MultiLibrary {
     using SafeMathLib
@@ -142,14 +143,17 @@ library MultiLibrary {
     timeoutOver(data)
     callerIsChannelParticipant(data)
     isSufficientBalance(data, data.amountOwed_, _channelAddress) {
-        uint returnToUserAmount = data.token_.balanceOf(_channelAddress).minus(data.amountOwed_);
+        uint balance = data.token_.balanceOf(_channelAddress);
         uint owedAmount = data.amountOwed_;
+        uint returnToUserAmount = balance.minus(owedAmount);
+
         data.amountOwed_ = 0;
 
         data.closedBlock_ = 0;
 
         if (owedAmount > 0) {
             require(data.token_.transfer(data.recipientAddress_, owedAmount));
+            // data.token_.transfer(data.recipientAddress_,owedAmount);
         }
 
         if (returnToUserAmount > 0 && data.shouldReturn_) {
@@ -158,26 +162,6 @@ library MultiLibrary {
 
         emit LogChannelSettled(block.number, owedAmount);
     }
-
-    // function settleETH(MultiChannelData storage data, address _channelAddress)
-    // public
-    // channelAlreadyClosed(data)
-    // timeoutOver(data)
-    // callerIsChannelParticipant(data)
-    // isSufficientBalance(data, data.amountOwed_, _channelAddress) {
-    //     uint returnToUserAmount = data.token_.balanceOf(_channelAddress).minus(data.amountOwed_);
-    //     uint amountToWithdraw = data.amountOwed_;
-    //     data.amountOwed_ = 0;
-
-    //     data.closedBlock_ = 0;
-    //     if (amountToWithdraw > 0) {
-    //         wrappedETH.transferETH(data.recipientAddress_,_channelAddress,amountToWithdraw);
-    //     }
-    //     if (returnToUserAmount > 0 && data.shouldReturn_) {
-    //         wrappedETH.transferETH(data.userAddress_,_channelAddress,returnToUserAmount);
-    //     }
-
-    // }
 
     /**
      * @notice Adding new tokens to the respective channel

@@ -159,26 +159,11 @@ contract MultiChannel
         channels[_addressOfToken].addChannel(_from,_addressOfSigner,_expiryNumberOfBlocks);
     }
 
-    function settleETH(address _addressOfToken)
-    public {
-        uint amountToWithdraw = channels[_addressOfToken].amountOwed_;
-        uint balance = wrappedETH.balance();
-        uint returnToUserAmount = balance.minus(amountToWithdraw);
-        channels[_addressOfToken].amountOwed_ = 0;
-
-        channels[_addressOfToken].closedBlock_ = 0;
-        if (amountToWithdraw > 0) {
-            wrappedETH.transfer(channels[_addressOfToken].recipientAddress_,amountToWithdraw);
-        }
-        if (returnToUserAmount > 0 && channels[_addressOfToken].shouldReturn_) {
-            wrappedETH.transfer(channels[_addressOfToken].userAddress_,returnToUserAmount);
-        }
-    }
-
     function() public payable {
     }
 
     function deposit(address _addressOfWETH)
+    channelExists(_addressOfWETH)
         external
     {
         require(_addressOfWETH.call.value(address(this).balance).gas(20317)());
