@@ -14,6 +14,7 @@ const signerAddress = allAccounts[2];
 const nonParticipantAddress = allAccounts[3];
 const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
 const userPk = Buffer.from(testConstant.USER_PK, 'hex');
+const BigNumber = require('bignumber.js');
 const recipientPk = Buffer.from(testConstant.RECIPIENT_PK, 'hex');
 let nonce = 1;
 
@@ -87,8 +88,8 @@ contract("Valid Transactions Made by User", function () {
         const initialCreatorBalance = await ERC20Token.methods.balanceOf(nonParticipantAddress).call();
         const stkchannelBalance = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
 
-        assert.equal(stkchannelBalance.valueOf(), transfer, "MultiChannel should have 50 tokens after transfer but does not");
-        assert.equal(initialCreatorBalance.valueOf(), (initialCreation - transfer).valueOf(), "Initial creator should have transferred amount of tokens removed from account");
+        assert.equal(stkchannelBalance, transfer, "MultiChannel should have 50 tokens after transfer but does not");
+        assert.equal(initialCreatorBalance, (initialCreation - transfer), "Initial creator should have transferred amount of tokens removed from account");
     });
 
     it("User should be allowed to close the channel with a valid signature just under amount deposited", async () => {
@@ -195,29 +196,29 @@ contract("Valid Transactions Made by User", function () {
             web3.eth.sendTransaction(transaction);
         }
 
-        const oldUserBalance = await ERC20Token.methods.balanceOf(userAddress).call();
-        const depositedTokens = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
+        const oldUserBalance = new BigNumber(await ERC20Token.methods.balanceOf(userAddress).call());
+        const depositedTokens = new BigNumber(await ERC20Token.methods.balanceOf(MultiChannel.options.address).call());
         const dataBefore = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
-        const oldStackBalance = await ERC20Token.methods.balanceOf(recipientAddress).call();
+        const oldStackBalance = new BigNumber(await ERC20Token.methods.balanceOf(recipientAddress).call());
         const amountOwed = dataBefore[indexes.AMOUNT_OWED];
-        const oldChannelBalance = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
+        const oldChannelBalance = new BigNumber(await ERC20Token.methods.balanceOf(MultiChannel.options.address).call());
 
         await MultiChannel.methods.settle(ERC20Token.options.address).send({
             from: recipientAddress
         });
         const dataAfter = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
-        const newUserBalance = await ERC20Token.methods.balanceOf(userAddress).call();
-        const newStackBalance = await ERC20Token.methods.balanceOf(recipientAddress).call();
-        const newChannelBalance = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
+        const newUserBalance = new BigNumber(await ERC20Token.methods.balanceOf(userAddress).call());
+        const newStackBalance = new BigNumber(await ERC20Token.methods.balanceOf(recipientAddress).call());
+        const newChannelBalance = new BigNumber(await ERC20Token.methods.balanceOf(MultiChannel.options.address).call());
 
 
-        assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf()) > 0, "Amount owed before settling should be greater than 0");
-        assert.strictEqual(parseInt(dataAfter[indexes.AMOUNT_OWED].valueOf()), 0, "Amount owed after settling should be 0");
-        assert.strictEqual(parseInt(dataBefore[indexes.CLOSED_NONCE].valueOf()), parseInt(dataAfter[indexes.CLOSED_NONCE].valueOf()), "closed nonce should not have been reset on settle");
-        assert.equal(parseInt(newStackBalance.valueOf()), parseInt(oldStackBalance.valueOf()) + parseInt(amountOwed.valueOf()), 'The recipientAddress account value should be credited');
-        assert.equal(parseInt(newChannelBalance.valueOf()), parseInt(oldChannelBalance.valueOf()) - parseInt(amountOwed.valueOf()), 'Unspent token should remain in the channel account');
-        assert.equal(parseInt(newUserBalance.valueOf()), parseInt(oldUserBalance.valueOf()), 'The User address account value should remain the same');
+        assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED]) > 0, "Amount owed before settling should be greater than 0");
+        assert.strictEqual(parseInt(dataAfter[indexes.AMOUNT_OWED]), 0, "Amount owed after settling should be 0");
+        assert.strictEqual(parseInt(dataBefore[indexes.CLOSED_NONCE]), parseInt(dataAfter[indexes.CLOSED_NONCE]), "closed nonce should not have been reset on settle");
+        assert.equal(parseInt(newStackBalance), parseInt(oldStackBalance) + parseInt(amountOwed), 'The recipientAddress account value should be credited');
+        assert.equal(parseInt(newChannelBalance), parseInt(oldChannelBalance) - parseInt(amountOwed), 'Unspent token should remain in the channel account');
+        assert.equal(parseInt(newUserBalance), parseInt(oldUserBalance), 'The User address account value should remain the same');
     });
 
     it("User should be allowed to close the channel with a valid signature less than amount deposited", async () => {
@@ -285,29 +286,29 @@ contract("Valid Transactions Made by User", function () {
             web3.eth.sendTransaction(transaction);
         }
 
-        const oldUserBalance = await ERC20Token.methods.balanceOf(userAddress).call();
-        const depositedTokens = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
+        const oldUserBalance = new BigNumber(await ERC20Token.methods.balanceOf(userAddress).call());
+        const depositedTokens = new BigNumber(await ERC20Token.methods.balanceOf(MultiChannel.options.address).call());
         const dataBefore = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
-        const oldStackBalance = await ERC20Token.methods.balanceOf(recipientAddress).call();
+        const oldStackBalance = new BigNumber(await ERC20Token.methods.balanceOf(recipientAddress).call());
         const amountOwed = dataBefore[indexes.AMOUNT_OWED];
-        const oldChannelBalance = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
+        const oldChannelBalance = new BigNumber(await ERC20Token.methods.balanceOf(MultiChannel.options.address).call());
 
         await MultiChannel.methods.settle(ERC20Token.options.address).send({
             from: recipientAddress
         });
         const dataAfter = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
-        const newUserBalance = await ERC20Token.methods.balanceOf(userAddress).call();
-        const newStackBalance = await ERC20Token.methods.balanceOf(recipientAddress).call();
-        const newChannelBalance = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
+        const newUserBalance = new BigNumber(await ERC20Token.methods.balanceOf(userAddress).call());
+        const newStackBalance = new BigNumber(await ERC20Token.methods.balanceOf(recipientAddress).call());
+        const newChannelBalance = new BigNumber(await ERC20Token.methods.balanceOf(MultiChannel.options.address).call());
 
 
-        assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf()) > 0, "Amount owed before settling should be greater than 0");
-        assert.strictEqual(parseInt(dataAfter[indexes.AMOUNT_OWED].valueOf()), 0, "Amount owed after settling should be 0");
-        assert.strictEqual(parseInt(dataBefore[indexes.CLOSED_NONCE].valueOf()), parseInt(dataAfter[indexes.CLOSED_NONCE].valueOf()), "closed nonce should not have been reset on settle");
-        assert.equal(parseInt(newStackBalance.valueOf()), parseInt(oldStackBalance.valueOf()) + parseInt(amountOwed.valueOf()), 'The recipientAddress account value should be credited');
-        assert.equal(parseInt(newChannelBalance.valueOf()), parseInt(oldChannelBalance.valueOf()) - parseInt(amountOwed.valueOf()), 'Unspent token should remain in the channel account');
-        assert.equal(parseInt(newUserBalance.valueOf()), parseInt(oldUserBalance.valueOf()), 'The User address account value should remain the same');
+        assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED]) > 0, "Amount owed before settling should be greater than 0");
+        assert.strictEqual(parseInt(dataAfter[indexes.AMOUNT_OWED]), 0, "Amount owed after settling should be 0");
+        assert.strictEqual(parseInt(dataBefore[indexes.CLOSED_NONCE]), parseInt(dataAfter[indexes.CLOSED_NONCE]), "closed nonce should not have been reset on settle");
+        assert.equal(parseInt(newStackBalance), parseInt(oldStackBalance) + parseInt(amountOwed), 'The recipientAddress account value should be credited');
+        assert.equal(parseInt(newChannelBalance), parseInt(oldChannelBalance) - parseInt(amountOwed), 'Unspent token should remain in the channel account');
+        assert.equal(parseInt(newUserBalance), parseInt(oldUserBalance), 'The User address account value should remain the same');
     });
 
 
@@ -431,14 +432,14 @@ contract("Valid Transactions Made by User", function () {
         const newChannelBalance = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
 
 
-        assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf()) > 0, "Amount owed before settling should be greater than 0");
-        assert.strictEqual(parseInt(dataAfter[indexes.AMOUNT_OWED].valueOf()), 0, "Amount owed after settling should be 0");
-        assert.strictEqual(parseInt(dataBefore[indexes.CLOSED_NONCE].valueOf()), parseInt(dataAfter[indexes.CLOSED_NONCE].valueOf()), "closed nonce should not have been reset on settle");
-        assert.equal(parseInt(newStackBalance.valueOf()), parseInt(oldStackBalance.valueOf()) + parseInt(amountOwed.valueOf()), 'The recipientAddress account value should be credited');
-        assert.equal(parseInt(newChannelBalance.valueOf()), parseInt(oldChannelBalance.valueOf()) - parseInt(amountOwed.valueOf()), 'Unspent token should remain in the channel account');
-        assert.equal(parseInt(newUserBalance.valueOf()), parseInt(oldUserBalance.valueOf()), 'The User address account value should remain the same');
+        assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED]) > 0, "Amount owed before settling should be greater than 0");
+        assert.strictEqual(parseInt(dataAfter[indexes.AMOUNT_OWED]), 0, "Amount owed after settling should be 0");
+        assert.strictEqual(parseInt(dataBefore[indexes.CLOSED_NONCE]), parseInt(dataAfter[indexes.CLOSED_NONCE]), "closed nonce should not have been reset on settle");
+        assert.equal(parseInt(newStackBalance), parseInt(oldStackBalance) + parseInt(amountOwed), 'The recipientAddress account value should be credited');
+        assert.equal(parseInt(newChannelBalance), parseInt(oldChannelBalance) - parseInt(amountOwed), 'Unspent token should remain in the channel account');
+        assert.equal(parseInt(newUserBalance), parseInt(oldUserBalance), 'The User address account value should remain the same');
     });
-    
+
     it("User can settle channel with funds returned", async () => {
         const transfer = 50;
         await ERC20Token.methods.approve(userAddress, transfer).send({
@@ -485,13 +486,13 @@ contract("Valid Transactions Made by User", function () {
         const newUserBalance = await ERC20Token.methods.balanceOf(userAddress).call();
         const newStackBalance = await ERC20Token.methods.balanceOf(recipientAddress).call();
 
-        assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf()) > 0, "Amount owed before settling should be equal to 0");
+        assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED]) > 0, "Amount owed before settling should be equal to 0");
         assert.strictEqual(dataBefore[indexes.SHOULD_RETURN], true, "Should return_token should have been set to true");
-        assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf()) > 0, "Amount owed before settling should be greater than 0");
-        assert.strictEqual(parseInt(dataAfter[indexes.AMOUNT_OWED].valueOf()), 0, "Amount owed after settling should be 0");
-        assert.strictEqual(parseInt(dataBefore[indexes.CLOSED_NONCE].valueOf()), parseInt(dataAfter[indexes.CLOSED_NONCE].valueOf()), "closed nonce should not have been reset on settle");
-        assert.equal(parseInt(newStackBalance.valueOf()), parseInt(oldStackBalance.valueOf()) + parseInt(amountOwed.valueOf()), 'The recipientAddress account value should be credited');
-        assert.equal(parseInt(newUserBalance.valueOf()), parseInt(oldUserBalance.valueOf()) + parseInt(depositedTokens.valueOf()) - parseInt(amountOwed.valueOf()), 'The User address should get back the unused tokens');
+        assert.ok(parseInt(dataBefore[indexes.AMOUNT_OWED]) > 0, "Amount owed before settling should be greater than 0");
+        assert.strictEqual(parseInt(dataAfter[indexes.AMOUNT_OWED]), 0, "Amount owed after settling should be 0");
+        assert.strictEqual(parseInt(dataBefore[indexes.CLOSED_NONCE]), parseInt(dataAfter[indexes.CLOSED_NONCE]), "closed nonce should not have been reset on settle");
+        assert.equal(parseInt(newStackBalance), parseInt(oldStackBalance) + parseInt(amountOwed), 'The recipientAddress account value should be credited');
+        assert.equal(parseInt(newUserBalance), parseInt(oldUserBalance) + parseInt(depositedTokens) - parseInt(amountOwed), 'The User address should get back the unused tokens');
     });
 
     it("User can close without signature if no IOUs exist", async () => {
@@ -544,9 +545,9 @@ contract("Valid Transactions Made by User", function () {
         }
         const dataBefore = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
-        const depositedTokens = await ERC20Token.methods.balanceOf(MultiChannel.options.address).call();
-        const oldStackBalance = await ERC20Token.methods.balanceOf(recipientAddress).call();
-        const oldUserBalance = await ERC20Token.methods.balanceOf(userAddress).call();
+        const depositedTokens = new BigNumber(await ERC20Token.methods.balanceOf(MultiChannel.options.address).call());
+        const oldStackBalance = new BigNumber(await ERC20Token.methods.balanceOf(recipientAddress).call());
+        const oldUserBalance = new BigNumber(await ERC20Token.methods.balanceOf(userAddress).call());
         const amountOwed = dataBefore[indexes.AMOUNT_OWED];
 
         await MultiChannel.methods.settle(ERC20Token.options.address).send({
@@ -554,14 +555,14 @@ contract("Valid Transactions Made by User", function () {
         });
         const dataAfter = await MultiChannel.methods.getChannelData(ERC20Token.options.address).call();
 
-        const newUserBalance = await ERC20Token.methods.balanceOf(userAddress).call();
-        const newStackBalance = await ERC20Token.methods.balanceOf(recipientAddress).call();
+        const newUserBalance = new BigNumber(await ERC20Token.methods.balanceOf(userAddress).call());
+        const newStackBalance = new BigNumber(await ERC20Token.methods.balanceOf(recipientAddress).call());
 
         assert.strictEqual(dataBefore[indexes.SHOULD_RETURN], true, "Should return_token should have been set to true");
-        assert.strictEqual(parseInt(dataBefore[indexes.AMOUNT_OWED].valueOf()), 0, "Amount owed before settling should be equal to 0");
-        assert.strictEqual(parseInt(dataAfter[indexes.AMOUNT_OWED].valueOf()), 0, "Amount owed after settling should be 0");
-        assert.strictEqual(parseInt(dataBefore[indexes.CLOSED_NONCE].valueOf()), parseInt(dataAfter[indexes.CLOSED_NONCE].valueOf()), "closed nonce should not have been reset on settle");
-        assert.equal(parseInt(newStackBalance.valueOf()), parseInt(oldStackBalance.valueOf()) + parseInt(amountOwed.valueOf()), 'The recipientAddress account value should be credited');
-        assert.equal(parseInt(newUserBalance.valueOf()), parseInt(oldUserBalance.valueOf()) + parseInt(depositedTokens.valueOf()) - parseInt(amountOwed.valueOf()), 'The User address should get back the unused tokens');
+        assert.strictEqual(parseInt(dataBefore[indexes.AMOUNT_OWED]), 0, "Amount owed before settling should be equal to 0");
+        assert.strictEqual(parseInt(dataAfter[indexes.AMOUNT_OWED]), 0, "Amount owed after settling should be 0");
+        assert.strictEqual(parseInt(dataBefore[indexes.CLOSED_NONCE]), parseInt(dataAfter[indexes.CLOSED_NONCE]), "closed nonce should not have been reset on settle");
+        assert.equal(parseInt(newStackBalance), parseInt(oldStackBalance) + parseInt(amountOwed), 'The recipientAddress account value should be credited');
+        assert.equal(parseInt(newUserBalance), parseInt(oldUserBalance) + parseInt(depositedTokens) - parseInt(amountOwed), 'The User address should get back the unused tokens');
     });
 });

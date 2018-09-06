@@ -7,6 +7,7 @@ const userAddress = allAccounts[0];
 const recipientAddress = allAccounts[1];
 const signerAddress = allAccounts[2];
 const nonParticipantAddress = allAccounts[3];
+const BigNumber = require('bignumber.js');
 const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
 const userPk = Buffer.from(testConstant.USER_PK, 'hex');
 const recipientPk = Buffer.from(testConstant.RECIPIENT_PK, 'hex');
@@ -71,8 +72,8 @@ contract("ERC20 Token Tests", function () {
     });
 
     it("STK Token should have 1 billion tokens in initialized account after declaration", async () => {
-        const balance = await ERC20Token.methods.balanceOf(nonParticipantAddress).call();
-        assert.equal(balance.valueOf(), 1000000000, '1 billion was not in the first account');
+        const balance = new BigNumber(await ERC20Token.methods.balanceOf(nonParticipantAddress).call());
+        assert.equal(balance.valueOf(), initialCreation, '1 billion was not in the first account');
     });
 
     it('STK Token should have symbol as STK', async () => {
