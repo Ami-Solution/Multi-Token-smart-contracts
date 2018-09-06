@@ -62,6 +62,7 @@ contract("Testing WETH", function () {
             }
         }, done);
     });
+
     it("WETH should have been deployed", async () => {
         let address = WETH.options.address;
         assert.ok(address.length > 0, "WETH should have been deployed");
@@ -112,7 +113,7 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address).send();
+        await MultiChannel.methods.deposit(WETH.options.address, 20317).send();
 
         const channelEth = await web3.eth.getBalance(MultiChannel.options.address);
 
@@ -136,7 +137,7 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address).send();
+        await MultiChannel.methods.deposit(WETH.options.address, 20317).send();
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
 
@@ -165,7 +166,7 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address).send();
+        await MultiChannel.methods.deposit(WETH.options.address, 20317).send();
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
 
@@ -195,7 +196,7 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address).send();
+        await MultiChannel.methods.deposit(WETH.options.address, 20317).send();
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
 
@@ -225,7 +226,7 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address).send();
+        await MultiChannel.methods.deposit(WETH.options.address, 20317).send();
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
 
@@ -280,7 +281,7 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address).send();
+        await MultiChannel.methods.deposit(WETH.options.address, 20317).send();
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
 

@@ -162,11 +162,11 @@ contract MultiChannel
     function() public payable {
     }
 
-    function deposit(address _addressOfWETH)
+    function deposit(address _addressOfWETH, uint gasAmount)
+    external
     channelExists(_addressOfWETH)
-        external
     {
-        require(_addressOfWETH.call.value(address(this).balance).gas(20317)());
+        require(_addressOfWETH.call.value(address(this).balance).gas(gasAmount)());
         emit Deposit(address(this).balance);
     }
 
