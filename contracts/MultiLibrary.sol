@@ -151,8 +151,7 @@ library MultiLibrary {
         data.closedBlock_ = 0;
 
         if (owedAmount > 0) {
-            require(data.token_.transfer(data.recipientAddress_, owedAmount));
-            // data.token_.transfer(data.recipientAddress_,owedAmount);
+            require(data.token_.transfer(data.recipientAddress_,owedAmount));
         }
 
         if (returnToUserAmount > 0 && data.shouldReturn_) {
