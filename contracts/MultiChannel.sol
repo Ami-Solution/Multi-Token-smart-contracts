@@ -1,7 +1,6 @@
 pragma solidity ^0.4.23;
 
 import "./SafeMathLib.sol";
-import "./WETH.sol";
 import "./MultiLibrary.sol";
 
 /**
