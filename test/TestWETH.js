@@ -69,7 +69,7 @@ contract("Testing WETH", function () {
     });
 
     it("Should be able to add a WETH channel", async () => {
-        await MultiChannel.methods.addWETH(WETH.options.address, userAddress, signerAddress, timeout).send({
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
             from: recipientAddress
         });
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
@@ -80,8 +80,8 @@ contract("Testing WETH", function () {
         assert.equal(data[indexes.SIGNER_ADDRESS], signerAddress, "Signer address should be equal");
     });
 
-    it("Should be able to deposit ETH", async () => {
-        await MultiChannel.methods.addWETH(WETH.options.address, userAddress, signerAddress, timeout).send({
+    it("Should be able to put ETH in channel", async () => {
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
             from: recipientAddress
         });
 
@@ -103,7 +103,7 @@ contract("Testing WETH", function () {
     });
 
     it("Should be able to convert ETH to WETH", async () => {
-        await MultiChannel.methods.addWETH(WETH.options.address, userAddress, signerAddress, timeout).send({
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
             from: recipientAddress
         });
 
@@ -113,7 +113,9 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address, 20317).send();
+        await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
+            from:userAddress
+        });
 
         const channelEth = await web3.eth.getBalance(MultiChannel.options.address);
 
@@ -127,7 +129,7 @@ contract("Testing WETH", function () {
     });
 
     it("Should be able to close WETH channel", async () => {
-        await MultiChannel.methods.addWETH(WETH.options.address, userAddress, signerAddress, timeout).send({
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
             from: recipientAddress
         });
 
@@ -137,7 +139,9 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address, 20317).send();
+        await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
+            from: userAddress
+        });
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
 
@@ -156,7 +160,7 @@ contract("Testing WETH", function () {
     });
 
     it("Should be able to close without signature with ETH", async () => {
-        await MultiChannel.methods.addWETH(WETH.options.address, userAddress, signerAddress, timeout).send({
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
             from: recipientAddress
         });
 
@@ -166,7 +170,9 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address, 20317).send();
+        await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
+            from: userAddress
+        });
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
 
@@ -186,7 +192,7 @@ contract("Testing WETH", function () {
     });
 
     it("Should be able to close without signature with ETH", async () => {
-        await MultiChannel.methods.addWETH(WETH.options.address, userAddress, signerAddress, timeout).send({
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
             from: recipientAddress
         });
 
@@ -196,7 +202,9 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address, 20317).send();
+        await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
+            from: userAddress
+        });
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
 
@@ -216,7 +224,7 @@ contract("Testing WETH", function () {
     });
 
     it("Should be able to settle with ETH with tokens not returned back to the user", async () => {
-        await MultiChannel.methods.addWETH(WETH.options.address, userAddress, signerAddress, timeout).send({
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
             from: recipientAddress
         });
 
@@ -226,7 +234,9 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address, 20317).send();
+        await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
+            from: userAddress
+        });
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
 
@@ -271,7 +281,7 @@ contract("Testing WETH", function () {
     });
 
     it("Should be able to settle with ETH returned back to the user", async () => {
-        await MultiChannel.methods.addWETH(WETH.options.address, userAddress, signerAddress, timeout).send({
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
             from: recipientAddress
         });
 
@@ -281,7 +291,9 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address, 20317).send();
+        await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
+            from: userAddress
+        });
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
 

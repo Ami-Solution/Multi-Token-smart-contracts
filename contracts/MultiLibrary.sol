@@ -2,7 +2,6 @@ pragma solidity ^ 0.4 .23;
 
 import "./ERC20Token.sol";
 import "./SafeMathLib.sol";
-import "./WETH.sol";
 
 library MultiLibrary {
     using SafeMathLib
