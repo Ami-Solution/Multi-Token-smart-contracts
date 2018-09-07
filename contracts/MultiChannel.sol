@@ -31,7 +31,6 @@ contract MultiChannel
 
     mapping (address => MultiLibrary.MultiChannelData) channels;
     address recipientAddress = msg.sender;
-    WETH wrappedETH;
     event LogChannelOpened(address from, address to, uint blockNumber);
     event LogChannelClosed(uint blockNumber, address closer, uint amount);
     event LogDeposited(address depositingAddress, uint amount);
@@ -149,14 +148,6 @@ contract MultiChannel
         require(recipientAddress == msg.sender);
         channels[_addressOfToken].token_ = ERC20Token(_addressOfToken);
         channels[_addressOfToken].addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
-    }
-
-    function addWETH(address _addressOfToken, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
-        external
-    {
-        wrappedETH = WETH(_addressOfToken);
-        channels[_addressOfToken].token_ = ERC20Token(_addressOfToken);
-        channels[_addressOfToken].addChannel(_from,_addressOfSigner,_expiryNumberOfBlocks);
     }
 
     function() public payable {
