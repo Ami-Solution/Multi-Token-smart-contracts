@@ -102,7 +102,7 @@ contract("Testing WETH", function () {
         assert.equal(tokenContract, 0, "WETH should have 1 ETH balance");
     });
 
-    it("Should be able to convert ETH to WETH", async () => {
+    it("Recipient be able to tokenize ETH", async () => {
         await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
             from: recipientAddress
         });
@@ -115,6 +115,32 @@ contract("Testing WETH", function () {
 
         await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
             from: recipientAddress
+        });
+
+        const channelEth = await web3.eth.getBalance(MultiChannel.options.address);
+
+        const tokenContract = await web3.eth.getBalance(WETH.options.address);
+
+        let channelBalance = await WETH.methods.totalSupply().call();
+
+        assert.equal(channelBalance, 1000000000000000000, "WETH token should have 1000000000000000000 tokens");
+        assert.equal(channelEth, 0, "ETH balance should not be in channel");
+        assert.equal(tokenContract, 1000000000000000000, "WETH should have 1 ETH balance");
+    });
+
+    it("STACK be able to convert ETH to WETH", async () => {
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await web3.eth.sendTransaction({
+            from: userAddress,
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
+        });
+
+        await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
+            from: userAddress
         });
 
         const channelEth = await web3.eth.getBalance(MultiChannel.options.address);
