@@ -114,7 +114,7 @@ contract("Testing WETH", function () {
         });
 
         await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
-            from:userAddress
+            from: recipientAddress
         });
 
         const channelEth = await web3.eth.getBalance(MultiChannel.options.address);
@@ -140,7 +140,7 @@ contract("Testing WETH", function () {
         });
 
         await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
-            from: userAddress
+            from: recipientAddress
         });
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
@@ -171,7 +171,7 @@ contract("Testing WETH", function () {
         });
 
         await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
-            from: userAddress
+            from: recipientAddress
         });
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
@@ -203,7 +203,7 @@ contract("Testing WETH", function () {
         });
 
         await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
-            from: userAddress
+            from: recipientAddress
         });
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
@@ -235,7 +235,7 @@ contract("Testing WETH", function () {
         });
 
         await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
-            from: userAddress
+            from: recipientAddress
         });
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
@@ -292,7 +292,7 @@ contract("Testing WETH", function () {
         });
 
         await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
-            from: userAddress
+            from: recipientAddress
         });
 
         const data = await MultiChannel.methods.getChannelData(WETH.options.address).call();
