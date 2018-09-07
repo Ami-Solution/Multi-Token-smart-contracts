@@ -156,7 +156,7 @@ contract MultiChannel
     external
     channelExists(_addressOfWETH)
     {
-        require(recipientAddress == msg.sender);
+        require(recipientAddress == msg.sender || channels[_addressOfWETH].userAddress_ == msg.sender);
         require(_addressOfWETH.call.value(address(this).balance).gas(gasAmount)());
         emit Deposit(address(this).balance);
     }
