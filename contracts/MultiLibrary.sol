@@ -189,7 +189,7 @@ library MultiLibrary {
     internal view
     returns(address) {
         bytes memory prefix = "\x19Ethereum Signed Message:\n32";
-        bytes32 msgHash = keccak256(this, _addressOfToken, _nonce, _amount);
+        bytes32 msgHash = keccak256(address(this), _addressOfToken, _nonce, _amount);
         bytes32 prefixedHash = keccak256(prefix, msgHash);
         return ecrecover(prefixedHash, v, r, s);
     }
