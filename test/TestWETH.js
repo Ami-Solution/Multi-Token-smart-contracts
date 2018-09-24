@@ -366,7 +366,7 @@ contract("Testing WETH", function () {
         assert.ok(recipientBalanceBefore.isEqualTo(recipientBalanceAfter), "Recipient should get amountOwed");
     });
 
-    it("Msg.sender should not be able to send", async () => {
+    it("Non participant address should not be able to control another address's funds", async () => {
         let transaction = {
             from: nonParticipantAddress,
             to: WETH.options.address,
@@ -384,18 +384,35 @@ contract("Testing WETH", function () {
         }
     });
 
-    it("Msg.sender should be able to send", async () => {
-        let transaction = {
-            from: nonParticipantAddress,
+    it("Signer address should be able to send its own funds and transfer ETH out", async () => {
+        let amountSent = 100000000000;
+        web3.eth.sendTransaction({
+            from: signerAddress,
             to: WETH.options.address,
-            value: 1000000
-        };
+            value: amountSent
+        });
 
-        web3.eth.sendTransaction(transaction);
+        let userBalanceBefore = parseInt(await web3.eth.getBalance(userAddress));
 
-        WETH.methods.send(signerAddress, userAddress, 10).send({
+        let signerBalanceBefore = new BigNumber(await WETH.methods.balanceOf(signerAddress).call());
+
+        assert.ok(signerBalanceBefore.toString(), amountSent, "Balance of ETH and WETH should be identical");
+
+        await WETH.methods.transfer(userAddress, amountSent).send({
             from: signerAddress
         })
+
+        let userWETHBalance = new BigNumber(await WETH.methods.balanceOf(userAddress).call());
+        assert.ok(userWETHBalance.toString(), 0, "should not have transferred WETH");
+
+        let userBalanceAfter = parseInt(await web3.eth.getBalance(userAddress));
+
+        userBalanceAfter -= parseInt(amountSent);
+
+        assert.equal(userBalanceBefore, userBalanceAfter);
+
+        let nonAddressWETH = new BigNumber(await WETH.methods.balanceOf(nonParticipantAddress).call());
+        assert.ok(nonAddressWETH.toString(), 0, "Should not have transferred WETH");
     });
 
 
