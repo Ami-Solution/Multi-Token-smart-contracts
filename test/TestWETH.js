@@ -407,7 +407,7 @@ contract("Testing WETH", function () {
 
         let userBalanceAfter = parseInt(await web3.eth.getBalance(userAddress));
 
-        userBalanceAfter -= parseInt(amountSent);
+        userBalanceAfter -= amountSent;
 
         assert.equal(userBalanceBefore, userBalanceAfter);
 
