@@ -385,7 +385,7 @@ contract("Testing WETH", function () {
     });
 
     it("Signer address should be able to send its own funds and transfer ETH out", async () => {
-        let amountSent = 100000000000;
+        const amountSent = 100000000000;
         web3.eth.sendTransaction({
             from: signerAddress,
             to: WETH.options.address,
@@ -414,6 +414,5 @@ contract("Testing WETH", function () {
         let nonAddressWETH = new BigNumber(await WETH.methods.balanceOf(nonParticipantAddress).call());
         assert.ok(nonAddressWETH.toString(), 0, "Should not have transferred WETH");
     });
-
 
 });
