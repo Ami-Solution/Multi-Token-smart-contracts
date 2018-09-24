@@ -366,4 +366,37 @@ contract("Testing WETH", function () {
         assert.ok(recipientBalanceBefore.isEqualTo(recipientBalanceAfter), "Recipient should get amountOwed");
     });
 
+    it("Msg.sender should not be able to send", async () => {
+        let transaction = {
+            from: nonParticipantAddress,
+            to: WETH.options.address,
+            value: 1000000
+        };
+        web3.eth.sendTransaction(transaction);
+
+        try {
+            await WETH.methods.send(signerAddress, userAddress, 10).send({
+                from: nonParticipantAddress
+            })
+            assert.fail("You should not be able to send amounts that are not yours");
+        } catch (error) {
+            assertRevert(error);
+        }
+    });
+
+    it("Msg.sender should be able to send", async () => {
+        let transaction = {
+            from: nonParticipantAddress,
+            to: WETH.options.address,
+            value: 1000000
+        };
+
+        web3.eth.sendTransaction(transaction);
+
+        WETH.methods.send(signerAddress, userAddress, 10).send({
+            from: signerAddress
+        })
+    });
+
+
 });
