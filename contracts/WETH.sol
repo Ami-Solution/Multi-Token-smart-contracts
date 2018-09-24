@@ -63,6 +63,7 @@ contract WETH {
   }
 
   function send(address src, address dst, uint wad) public returns(bool) {
+    require(msg.sender == src);
     require(balances[src]>=wad);
     balances[src] -= wad;
     dst.transfer(wad);

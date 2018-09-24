@@ -366,4 +366,53 @@ contract("Testing WETH", function () {
         assert.ok(recipientBalanceBefore.isEqualTo(recipientBalanceAfter), "Recipient should get amountOwed");
     });
 
+    it("Non participant address should not be able to control another address's funds", async () => {
+        let transaction = {
+            from: nonParticipantAddress,
+            to: WETH.options.address,
+            value: 1000000
+        };
+        web3.eth.sendTransaction(transaction);
+
+        try {
+            await WETH.methods.send(signerAddress, userAddress, 10).send({
+                from: nonParticipantAddress
+            })
+            assert.fail("You should not be able to send amounts that are not yours");
+        } catch (error) {
+            assertRevert(error);
+        }
+    });
+
+    it("Signer address should be able to send its own funds and transfer ETH out", async () => {
+        const amountSent = 100000000000;
+        web3.eth.sendTransaction({
+            from: signerAddress,
+            to: WETH.options.address,
+            value: amountSent
+        });
+
+        let userBalanceBefore = parseInt(await web3.eth.getBalance(userAddress));
+
+        let signerBalanceBefore = new BigNumber(await WETH.methods.balanceOf(signerAddress).call());
+
+        assert.ok(signerBalanceBefore.toString(), amountSent, "Balance of ETH and WETH should be identical");
+
+        await WETH.methods.transfer(userAddress, amountSent).send({
+            from: signerAddress
+        })
+
+        let userWETHBalance = new BigNumber(await WETH.methods.balanceOf(userAddress).call());
+        assert.ok(userWETHBalance.toString(), 0, "should not have transferred WETH");
+
+        let userBalanceAfter = parseInt(await web3.eth.getBalance(userAddress));
+
+        userBalanceAfter -= amountSent;
+
+        assert.equal(userBalanceBefore, userBalanceAfter);
+
+        let nonAddressWETH = new BigNumber(await WETH.methods.balanceOf(nonParticipantAddress).call());
+        assert.ok(nonAddressWETH.toString(), 0, "Should not have transferred WETH");
+    });
+
 });
