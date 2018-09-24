@@ -82,7 +82,7 @@ contract MultiChannel
         external
         channelExists(_addressOfToken)
     {
-        channels[_addressOfToken].close(address(this), _addressOfToken, _nonce, _amount, _v,_r,_s, _returnToken);
+        channels[_addressOfToken].close(_addressOfToken, _nonce, _amount, _v,_r,_s, _returnToken);
         emit LogChannelClosed(block.number, msg.sender, _amount);
     }
 
@@ -118,7 +118,7 @@ contract MultiChannel
         external
         channelExists(_addressOfToken)
     {
-        channels[_addressOfToken].updateClosedChannel(address(this), _addressOfToken, _nonce, _amount, _v, _r, _s);
+        channels[_addressOfToken].updateClosedChannel(_addressOfToken, _nonce, _amount, _v, _r, _s);
         emit LogChannelContested(_amount, msg.sender);
     }
 
@@ -130,7 +130,7 @@ contract MultiChannel
         external
         channelExists(_addressOfToken)
     {
-        channels[_addressOfToken].settle(address(this));
+        channels[_addressOfToken].settle();
     }
 
     /**

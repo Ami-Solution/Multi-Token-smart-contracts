@@ -54,7 +54,6 @@ library MultiLibrary {
     /**
      * @notice Function to close the payment channel.
      * @param data The channel specific data to work on.
-     * @param _channelAddress The address of the respective multitoken channel.
      * @param _addressOfToken The address of the token.
      * @param _nonce The nonce of the deposit. Used for avoiding replay attacks.
      * @param _amount The amount of tokens claimed to be due to the receiver.
@@ -65,7 +64,6 @@ library MultiLibrary {
      */
     function close(
         MultiChannelData storage data,
-        address _channelAddress,
         address _addressOfToken,
         uint _nonce,
         uint _amount,
@@ -77,7 +75,7 @@ library MultiLibrary {
     public
     channelIsOpen(data)
     callerIsChannelParticipant(data)
-    isSufficientBalance(data, _amount, _channelAddress) {
+    isSufficientBalance(data, _amount, address(this)) {
         address signerAddress = recoverAddressFromHashAndParameters(_addressOfToken, _nonce, _amount, _r, _s, _v);
         require((signerAddress == data.signerAddress_ && data.recipientAddress_ == msg.sender) || (signerAddress == data.recipientAddress_ && data.userAddress_ == msg.sender));
         require(signerAddress != msg.sender);
@@ -112,7 +110,6 @@ library MultiLibrary {
      */
     function updateClosedChannel(
         MultiChannelData storage data,
-        address _channelAddress,
         address _addressOfToken,
         uint _nonce,
         uint _amount,
@@ -122,7 +119,7 @@ library MultiLibrary {
     public
     callerIsChannelParticipant(data)
     channelAlreadyClosed(data)
-    isSufficientBalance(data, _amount, _channelAddress)
+    isSufficientBalance(data, _amount, address(this))
     inContestPeriod(data) {
         address signerAddress = recoverAddressFromHashAndParameters(_addressOfToken, _nonce, _amount, _r, _s, _v);
         require((signerAddress == data.signerAddress_ && data.recipientAddress_ == msg.sender) || (signerAddress == data.recipientAddress_ && data.userAddress_ == msg.sender));
@@ -134,15 +131,14 @@ library MultiLibrary {
     /**
      * @notice After the timeout of the channel after closing has passed, can be called by either participant to withdraw funds.
      * @param data The channel specific data to work on.
-     * @param _channelAddress The address of the multichannel to interact with.
      */
-    function settle(MultiChannelData storage data, address _channelAddress)
+    function settle(MultiChannelData storage data)
     public
     channelAlreadyClosed(data)
     timeoutOver(data)
     callerIsChannelParticipant(data)
-    isSufficientBalance(data, data.amountOwed_, _channelAddress) {
-        uint balance = data.token_.balanceOf(_channelAddress);
+    isSufficientBalance(data, data.amountOwed_, address(this)) {
+        uint balance = data.token_.balanceOf(address(this));
         uint owedAmount = data.amountOwed_;
         uint returnToUserAmount = balance.minus(owedAmount);
 
