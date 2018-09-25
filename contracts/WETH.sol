@@ -13,9 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import "./SafeMathLib.sol";
+
 pragma solidity ^0.4.25;
 
 contract WETH {
+  using SafeMathLib for uint;
   string public name = "Wrapped Ether";
   string public symbol = "WETH";
   uint8 public decimals = 18;
