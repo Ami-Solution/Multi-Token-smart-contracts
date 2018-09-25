@@ -46,14 +46,6 @@ contract("Valid Transactions Made by User", function () {
                 },
                 MultiLibrary: {
                     args: [
-                        '$ERC20Token',
-                        '0xC6eA7fD8628672780dd4F17Ffda321AA6753134B',
-                        signerAddress,
-                        recipientAddress,
-                        timeout,
-                        1,
-                        0,
-                        0
                     ],
                     "from": recipientAddress
                 },

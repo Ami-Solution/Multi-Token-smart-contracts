@@ -44,13 +44,6 @@ contract("Illegal State Transition", function () {
                 },
                 MultiLibrary: {
                     args: [
-                        '$ERC20Token',
-                        signerAddress,
-                        recipientAddress,
-                        timeout,
-                        1,
-                        0,
-                        0
                     ],
                     "fromIndex": 1
                 },
