@@ -167,7 +167,7 @@ contract MultiChannel
      */
 
     function getChannelData(address _addressOfToken) view public returns (address, address, address, uint, uint, uint, uint, bool) {
-        MultiLibrary.MultiChannelData channel = channels[_addressOfToken];
+        MultiLibrary.MultiChannelData memory channel = channels[_addressOfToken];
         return (channel.userAddress_,
         channel.signerAddress_,
         channel.recipientAddress_,
