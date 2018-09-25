@@ -44,7 +44,6 @@ contract("Non Channel Participant Actions", function () {
                     "from": nonParticipantAddress
                 },
                 MultiLibrary: {
-                    args: [],
                     "from": recipientAddress
                 },
                 "MultiChannel": {

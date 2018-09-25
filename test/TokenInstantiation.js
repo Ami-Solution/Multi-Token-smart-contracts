@@ -43,7 +43,6 @@ contract("Token Instantiation Tests", function () {
                     "from": nonParticipantAddress
                 },
                 MultiLibrary: {
-                    args: [],
                     "from": recipientAddress
                 },
                 "MultiChannel": {

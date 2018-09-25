@@ -40,7 +40,6 @@ contract("ERC20 Token Tests", function () {
                     "from": nonParticipantAddress
                 },
                 MultiLibrary: {
-                    args: [],
                     "from": recipientAddress
                 },
                 "MultiChannel": {

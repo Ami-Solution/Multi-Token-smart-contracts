@@ -45,8 +45,6 @@ contract("Valid Transactions Made by User", function () {
                     "from": nonParticipantAddress
                 },
                 MultiLibrary: {
-                    args: [
-                    ],
                     "from": recipientAddress
                 },
                 "MultiChannel": {

@@ -43,7 +43,6 @@ contract("Valid Recipient Addresses", function () {
                     "from": nonParticipantAddress
                 },
                 MultiLibrary: {
-                    args: [],
                     "from": recipientAddress
                 },
                 "MultiChannel": {

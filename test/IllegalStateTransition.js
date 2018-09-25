@@ -43,8 +43,6 @@ contract("Illegal State Transition", function () {
                     "from": nonParticipantAddress
                 },
                 MultiLibrary: {
-                    args: [
-                    ],
                     "fromIndex": 1
                 },
                 "MultiChannel": {

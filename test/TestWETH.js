@@ -39,7 +39,6 @@ contract("Testing WETH", function () {
                     "from": nonParticipantAddress
                 },
                 MultiLibrary: {
-                    args: [],
                     "fromIndex": 1
                 },
                 "MultiChannel": {
