@@ -39,15 +39,6 @@ contract("Testing WETH", function () {
                     "from": nonParticipantAddress
                 },
                 MultiLibrary: {
-                    args: [
-                        '$ERC20Token',
-                        signerAddress,
-                        recipientAddress,
-                        timeout,
-                        1,
-                        0,
-                        0
-                    ],
                     "fromIndex": 1
                 },
                 "MultiChannel": {

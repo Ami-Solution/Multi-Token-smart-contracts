@@ -43,15 +43,6 @@ contract("Token Instantiation Tests", function () {
                     "from": nonParticipantAddress
                 },
                 MultiLibrary: {
-                    args: [
-                        '$ERC20Token',
-                        signerAddress,
-                        recipientAddress,
-                        timeout,
-                        1,
-                        0,
-                        0
-                    ],
                     "from": recipientAddress
                 },
                 "MultiChannel": {
