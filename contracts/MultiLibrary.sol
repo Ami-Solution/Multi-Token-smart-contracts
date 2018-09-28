@@ -7,6 +7,17 @@ library MultiLibrary {
     using SafeMathLib
     for uint;
 
+    /** @notice Channel data unique to each sub-channel
+     * @param token_ The address of the token for the sub-channel to be added
+     * @param userAddress_ The address to which funds will be returned once the channel is settled
+     * @param signerAddress_ The public address of the private/public key pair generated on the mobile phone
+     * @param recipientAddress_ The address of the recipient of the funds
+     * @param timeout_ The duration of the contest period in block numbers
+     * @param amountOwed_ The amount of tokens owed to the recipient in the channel
+     * @param closedBlock_ The number at which the channel was last closed; if never closed before, 0
+     * @param closedNonce_ The nonce at hwich the channel was last closed; if never closed before, 0
+     * @param shouldReturn_ Boolean value representing whether the tokens should be returned upon close
+     */
     struct MultiChannelData {
         ERC20Token token_;
         address userAddress_;
