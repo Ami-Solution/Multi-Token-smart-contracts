@@ -35,15 +35,23 @@ contract WETH {
         deposit();
     }
 
-
+    /** @notice Returns the tokenized WETH balance of the address provided
+    * @param addr The address to query
+    */
     function balanceOf(address addr) public view returns(uint) {
         return balances[addr];
     }
 
+    /** @notice Allows a user to unwrap their WETH to their address
+    * @param wad Amount to withdraw
+    */
     function deposit() public payable {
         balances[msg.sender] += msg.value;
     }
 
+    /** @notice Allows msg.sender convert WETH to ETH
+    * @param wad Amount of WETH to unwrap
+    */
     function withdraw(uint wad) public {
         require(balances[msg.sender] >= wad);
         balances[msg.sender] -= wad;
@@ -51,21 +59,36 @@ contract WETH {
         emit Withdrawal(msg.sender, wad);
     }
 
+    /** @notice Returns the total supply of ETH in the contract
+     */
     function totalSupply() public view returns(uint) {
         return address(this).balance;
     }
 
+    /** @notice Allows msg.sender to increas allowance in WETH to send someone
+    * @param guy  - Destination address to increase approval to 
+    * @param wad - Amount to send to the destination
+     */
     function approve(address guy, uint wad) public returns(bool) {
         allowance[msg.sender][guy] = wad;
         emit Approval(msg.sender, guy, wad);
         return true;
     }
 
+    /** @notice Automatically unwraps ETH, and sends ETH to destination address
+    * @param dst - Destination address to send ETH
+    * @param wad - Amount to send to destination address
+     */
     function transfer(address dst, uint wad) public returns(bool) {
         send(msg.sender,dst,wad);
         return true;
     }
 
+    /** @notice Automatically unwraps ETH, and sends ETH to destination address
+    * @param src - The sender address of WETH
+    * @param dst - Destination address to send ETH
+    * @param wad - Amount to send to destination address
+     */
     function send(address src, address dst, uint wad) public returns(bool) {
         require(msg.sender == src);
         require(balances[src]>=wad);
