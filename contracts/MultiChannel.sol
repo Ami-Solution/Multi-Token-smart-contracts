@@ -34,8 +34,6 @@ contract MultiChannel
     event LogChannelClosed(uint blockNumber, address closer, uint amount);
     event LogDeposited(address depositingAddress, uint amount);
     event LogChannelContested(uint amount, address caller);
-    event Deposit(uint amount);
-
     /**
      * @dev Contract constructor
      * @param _from The user address in the contract.
@@ -149,16 +147,34 @@ contract MultiChannel
         channels[_addressOfToken].addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
     }
 
+    /**
+    * @notice Allowing ETH deposits to the channel address
+     */
     function() public payable {
     }
 
-    function deposit(address _addressOfWETH, uint gasAmount)
+    /** @notice After ETH deposit is made via fallback function, deposit is called using signed transaction by signer address by recipient or user
+    * @param _addressOfWETH The specific address of WETH to deposit to
+    * @param _nonce For deposit signatures, expected to be 0
+    * @param _amount For deposit amount, expected to be 0
+    * @param _v Cryptographic param v derived from signature
+    * @param _r Cryptographic param r derived from signature
+    * @param _s Cryptographic param s derived from signature
+    * @param gasAmount Amount of gas to use to deposit ETh into channel
+     */
+
+    function deposit(
+        address _addressOfWETH,
+        uint _nonce,
+        uint _amount,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s,
+        uint gasAmount)
     external
     channelExists(_addressOfWETH)
     {
-        require(recipientAddress == msg.sender || channels[_addressOfWETH].userAddress_ == msg.sender);
-        require(_addressOfWETH.call.value(address(this).balance).gas(gasAmount)());
-        emit Deposit(address(this).balance);
+        channels[_addressOfWETH].deposit(_addressOfWETH, _nonce, _amount, _v, _r, _s, gasAmount);
     }
 
     /**

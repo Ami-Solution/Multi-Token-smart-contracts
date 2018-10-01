@@ -31,7 +31,8 @@ library MultiLibrary {
     }
 
     event LogChannelSettled(uint blockNumber, uint finalBalance);
-    event CloseTest(address addr);
+    event Deposit(uint amount);
+
 
     modifier channelAlreadyClosed(MultiChannelData storage data) {
         require(data.closedBlock_ > 0);
@@ -60,6 +61,36 @@ library MultiLibrary {
     modifier isSufficientBalance(MultiChannelData storage data, uint amount, address channelAddress) {
         require(amount <= data.token_.balanceOf(channelAddress));
         _;
+    }
+
+    /** @notice Function to deposit funds into WETH payment channel with user authentication
+    * @param data The channel specific data to work on.
+    * @param _addressOfWETH The specific address of WETH to deposit to
+    * @param _nonce For deposit signatures, expected to be 0
+    * @param _amount For deposit amount, expected to be 0
+    * @param _v Cryptographic param v derived from signature
+    * @param _r Cryptographic param r derived from signature
+    * @param _s Cryptographic param s derived from signature
+    * @param gasAmount Amount of gas to use to deposit ETh into channel
+     */
+
+    function deposit(
+        MultiChannelData storage data,
+        address _addressOfWETH,
+        uint _nonce,
+        uint _amount,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s,
+        uint gasAmount
+    )
+    public
+    callerIsChannelParticipant(data)
+    {
+        address signerAddress = recoverAddressFromHashAndParameters(_addressOfWETH, _nonce, _amount, _r, _s, _v);
+        require(signerAddress == data.signerAddress_);
+        require (_addressOfWETH.call.value(address(this).balance).gas(gasAmount)());
+        emit Deposit(address(this).balance);
     }
 
     /**
