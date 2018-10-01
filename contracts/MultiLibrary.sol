@@ -63,6 +63,17 @@ library MultiLibrary {
         _;
     }
 
+    /** @notice Function to deposit funds into WETH payment channel with user authentication
+    * @param data The channel specific data to work on.
+    * @param _addressOfWETH The specific address of WETH to deposit to
+    * @param _nonce For deposit signatures, expected to be 0
+    * @param _amount For deposit amount, expected to be 0
+    * @param _v Cryptographic param v derived from signature
+    * @param _r Cryptographic param r derived from signature
+    * @param _s Cryptographic param s derived from signature
+    * @param gasAmount Amount of gas to use to deposit ETh into channel
+     */
+
     function deposit(
         MultiChannelData storage data,
         address _addressOfWETH,

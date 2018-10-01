@@ -147,8 +147,21 @@ contract MultiChannel
         channels[_addressOfToken].addChannel(_from, _addressOfSigner, _expiryNumberOfBlocks);
     }
 
+    /**
+    * @notice Allowing ETH deposits to the channel address
+     */
     function() public payable {
     }
+
+    /** @notice After ETH deposit is made via fallback function, deposit is called using signed transaction by signer address by recipient or user
+    * @param _addressOfWETH The specific address of WETH to deposit to
+    * @param _nonce For deposit signatures, expected to be 0
+    * @param _amount For deposit amount, expected to be 0
+    * @param _v Cryptographic param v derived from signature
+    * @param _r Cryptographic param r derived from signature
+    * @param _s Cryptographic param s derived from signature
+    * @param gasAmount Amount of gas to use to deposit ETh into channel
+     */
 
     function deposit(
         address _addressOfWETH,
