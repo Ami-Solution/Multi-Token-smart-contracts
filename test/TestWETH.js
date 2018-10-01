@@ -18,6 +18,8 @@ const signersPk = Buffer.from(testConstant.SIGNER_PK, 'hex');
 const userPk = Buffer.from(testConstant.USER_PK, 'hex');
 const recipientPk = Buffer.from(testConstant.RECIPIENT_PK, 'hex');
 let nonce = 1;
+const depositNonce = 0;
+const depositAmount = 0;
 
 contract("Testing WETH", function () {
     beforeEach((done) => {
@@ -93,7 +95,7 @@ contract("Testing WETH", function () {
         assert.equal(tokenContract, 0, "WETH should have 1 ETH balance");
     });
 
-    it("Recipient be able to tokenize ETH", async () => {
+    it("Recipient should be able to convert ETH to WETH with signer-signed signature", async () => {
         await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
             from: recipientAddress
         });
@@ -104,7 +106,9 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, depositNonce, depositAmount, MultiChannel.options.address, signersPk);
+
+        await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
             from: recipientAddress
         });
 
@@ -119,7 +123,7 @@ contract("Testing WETH", function () {
         assert.equal(tokenContract, 1000000000000000000, "WETH should have 1 ETH balance");
     });
 
-    it("STACK be able to convert ETH to WETH", async () => {
+    it("User should not be able to convert ETH to WETH with self-signed signature", async () => {
         await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
             from: recipientAddress
         });
@@ -130,8 +134,34 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
-            from: userAddress
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, depositNonce, depositAmount, MultiChannel.options.address, userPk);
+
+        try {
+            await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
+                from: userAddress
+            });
+            assert.fail("User should not be able to convert with self-signed signature")
+        }
+        catch (error) {
+            assertRevert(error);
+        }
+    });
+
+    it("User should be able to convert ETH to WETH with signer-signed signature", async () => {
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await web3.eth.sendTransaction({
+            from: userAddress,
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
+        });
+
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, depositNonce, depositAmount, MultiChannel.options.address, signersPk);
+
+        await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
+            from: recipientAddress
         });
 
         const channelEth = await web3.eth.getBalance(MultiChannel.options.address);
@@ -143,6 +173,54 @@ contract("Testing WETH", function () {
         assert.equal(channelBalance, 1000000000000000000, "WETH token should have 1000000000000000000 tokens");
         assert.equal(channelEth, 0, "ETH balance should not be in channel");
         assert.equal(tokenContract, 1000000000000000000, "WETH should have 1 ETH balance");
+    });
+
+    it("Recipient should not be able to convert ETH to WETH with self-signed signature", async () => {
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await web3.eth.sendTransaction({
+            from: userAddress,
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
+        });
+
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, depositNonce, depositAmount, MultiChannel.options.address, recipientPk);
+
+        try {
+            await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
+                from: recipientAddress
+            });
+            assert.fail("Recipient should not be able to convert with self-signed signature")
+        }
+        catch (error) {
+            assertRevert(error);
+        }
+    });
+
+    it("User should not be able to convert ETH to WETH with recipient-signed signature", async () => {
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await web3.eth.sendTransaction({
+            from: userAddress,
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
+        });
+
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, depositNonce, depositAmount, MultiChannel.options.address, recipientPk);
+
+        try {
+            await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
+                from: userAddress
+            });
+            assert.fail("User should not be able to convert with recipient-signed signature")
+        }
+        catch (error) {
+            assertRevert(error);
+        }
     });
 
     it("Should be able to close WETH channel", async () => {
@@ -156,7 +234,9 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, depositNonce, depositAmount, MultiChannel.options.address, signersPk);
+
+        await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
             from: recipientAddress
         });
 
@@ -187,7 +267,9 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, depositNonce, depositAmount, MultiChannel.options.address, signersPk);
+
+        await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
             from: recipientAddress
         });
 
@@ -219,7 +301,9 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, depositNonce, depositAmount, MultiChannel.options.address, signersPk);
+
+        await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
             from: recipientAddress
         });
 
@@ -251,7 +335,9 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, depositNonce, depositAmount, MultiChannel.options.address, signersPk);
+
+        await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
             from: recipientAddress
         });
 
@@ -308,7 +394,9 @@ contract("Testing WETH", function () {
             value: 1000000000000000000
         });
 
-        await MultiChannel.methods.deposit(WETH.options.address, 20317).send({
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, depositNonce, depositAmount, MultiChannel.options.address, signersPk);
+
+        await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
             from: recipientAddress
         });
 

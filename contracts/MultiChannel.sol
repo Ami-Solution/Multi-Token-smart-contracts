@@ -34,8 +34,6 @@ contract MultiChannel
     event LogChannelClosed(uint blockNumber, address closer, uint amount);
     event LogDeposited(address depositingAddress, uint amount);
     event LogChannelContested(uint amount, address caller);
-    event Deposit(uint amount);
-
     /**
      * @dev Contract constructor
      * @param _from The user address in the contract.
@@ -152,13 +150,18 @@ contract MultiChannel
     function() public payable {
     }
 
-    function deposit(address _addressOfWETH, uint gasAmount)
+    function deposit(
+        address _addressOfWETH,
+        uint _nonce,
+        uint _amount,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s,
+        uint gasAmount)
     external
     channelExists(_addressOfWETH)
     {
-        require(recipientAddress == msg.sender || channels[_addressOfWETH].userAddress_ == msg.sender);
-        require(_addressOfWETH.call.value(address(this).balance).gas(gasAmount)());
-        emit Deposit(address(this).balance);
+        channels[_addressOfWETH].deposit(_addressOfWETH, _nonce, _amount, _v, _r, _s, gasAmount);
     }
 
     /**

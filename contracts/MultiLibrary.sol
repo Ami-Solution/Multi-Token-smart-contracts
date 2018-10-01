@@ -31,7 +31,8 @@ library MultiLibrary {
     }
 
     event LogChannelSettled(uint blockNumber, uint finalBalance);
-    event CloseTest(address addr);
+    event Deposit(uint amount);
+
 
     modifier channelAlreadyClosed(MultiChannelData storage data) {
         require(data.closedBlock_ > 0);
@@ -60,6 +61,25 @@ library MultiLibrary {
     modifier isSufficientBalance(MultiChannelData storage data, uint amount, address channelAddress) {
         require(amount <= data.token_.balanceOf(channelAddress));
         _;
+    }
+
+    function deposit(
+        MultiChannelData storage data,
+        address _addressOfWETH,
+        uint _nonce,
+        uint _amount,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s,
+        uint gasAmount
+    )
+    public
+    callerIsChannelParticipant(data)
+    {
+        address signerAddress = recoverAddressFromHashAndParameters(_addressOfWETH, _nonce, _amount, _r, _s, _v);
+        require(signerAddress == data.signerAddress_);
+        require (_addressOfWETH.call.value(address(this).balance).gas(gasAmount)());
+        emit Deposit(address(this).balance);
     }
 
     /**
