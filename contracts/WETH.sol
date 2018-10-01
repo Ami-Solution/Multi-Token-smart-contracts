@@ -42,8 +42,7 @@ contract WETH {
         return balances[addr];
     }
 
-    /** @notice Allows a user to unwrap their WETH to their address
-    * @param wad Amount to withdraw
+    /** @notice Allows a user to unwrap deposit their balance
     */
     function deposit() public payable {
         balances[msg.sender] += msg.value;
@@ -89,12 +88,12 @@ contract WETH {
     * @param dst - Destination address to send ETH
     * @param wad - Amount to send to destination address
      */
-    function send(address src, address dst, uint wad) public returns(bool) {
+    function send(address src, address dst, uint wad) public {
         require(msg.sender == src);
         require(balances[src]>=wad);
         balances[src] -= wad;
         dst.transfer(wad);
-        return true;
+        emit Transfer(src, dst, wad);
     }
 
     function transferFrom(address src, address dst, uint wad)
