@@ -175,7 +175,7 @@ contract("Testing WETH", function () {
         assert.equal(tokenContract, 1000000000000000000, "WETH should have 1 ETH balance");
     });
 
-    it("Non Channel Participant should be able to convert ETH to WETH with signer-signed signature", async () => {
+    it("Non Channel Participant should not be able to convert ETH to WETH with signer-signed signature", async () => {
         await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
             from: recipientAddress
         });
