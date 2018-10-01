@@ -175,6 +175,30 @@ contract("Testing WETH", function () {
         assert.equal(tokenContract, 1000000000000000000, "WETH should have 1 ETH balance");
     });
 
+    it("Non Channel Participant should be able to convert ETH to WETH with signer-signed signature", async () => {
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await web3.eth.sendTransaction({
+            from: userAddress,
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
+        });
+
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, depositNonce, depositAmount, MultiChannel.options.address, signersPk);
+
+        try {
+            await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
+                from: nonParticipantAddress
+            });
+            assert.fail("Recipient should not be able to convert with self-signed signature")
+        }
+        catch (error) {
+            assertRevert(error);
+        }
+    });
+
     it("Recipient should not be able to convert ETH to WETH with self-signed signature", async () => {
         await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
             from: recipientAddress
