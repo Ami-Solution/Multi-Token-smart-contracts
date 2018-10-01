@@ -46,7 +46,7 @@ contract MultiChannel
         address _addressOfSigner,
         address _addressOfToken,
         uint _expiryNumberOfBlocks)
-        public
+    public
     {
         channels[_addressOfToken].token_ = ERC20Token(_addressOfToken);
         channels[_addressOfToken].userAddress_ = _from;
@@ -75,10 +75,9 @@ contract MultiChannel
         uint8 _v,
         bytes32 _r,
         bytes32 _s,
-        bool _returnToken
-        )
-        external
-        channelExists(_addressOfToken)
+        bool _returnToken)
+    external
+    channelExists(_addressOfToken)
     {
         channels[_addressOfToken].close(_addressOfToken, _nonce, _amount, _v,_r,_s, _returnToken);
         emit LogChannelClosed(block.number, msg.sender, _amount);
@@ -88,10 +87,9 @@ contract MultiChannel
     * @notice Function to close the payment channel without a signature.
     * @param _addressOfToken The address of the token the user wants to interact with.
     */
-    function closeWithoutSignature(
-        address _addressOfToken)
-        external
-        channelExists(_addressOfToken)
+    function closeWithoutSignature(address _addressOfToken)
+    external
+    channelExists(_addressOfToken)
     {
         channels[_addressOfToken].closeWithoutSignature();
         emit LogChannelClosed(block.number, msg.sender, channels[_addressOfToken].amountOwed_);
@@ -113,8 +111,8 @@ contract MultiChannel
         uint8 _v,
         bytes32 _r,
         bytes32 _s)
-        external
-        channelExists(_addressOfToken)
+    external
+    channelExists(_addressOfToken)
     {
         channels[_addressOfToken].updateClosedChannel(_addressOfToken, _nonce, _amount, _v, _r, _s);
         emit LogChannelContested(_amount, msg.sender);
@@ -125,8 +123,8 @@ contract MultiChannel
     * @param _addressOfToken The address of the multichannel to interact with.
     */
     function settle( address _addressOfToken)
-        external
-        channelExists(_addressOfToken)
+    external
+    channelExists(_addressOfToken)
     {
         channels[_addressOfToken].settle();
     }
@@ -138,9 +136,13 @@ contract MultiChannel
     * @param _addressOfSigner The addres of the signer.
     * @param _expiryNumberOfBlocks The timeout period for the given channel.
     */
-    function addChannel(address _addressOfToken, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
-        external
-        channelDoesNotExist(_addressOfToken)
+    function addChannel(
+        address _addressOfToken,
+        address _from,
+        address _addressOfSigner,
+        uint _expiryNumberOfBlocks)
+    external
+    channelDoesNotExist(_addressOfToken)
     {
         require(recipientAddress == msg.sender);
         channels[_addressOfToken].token_ = ERC20Token(_addressOfToken);
@@ -182,7 +184,10 @@ contract MultiChannel
     * @param _addressOfToken The address of the token the user wants to interact with.
      */
 
-    function getChannelData(address _addressOfToken) view public returns (address, address, address, uint, uint, uint, uint, bool) {
+    function getChannelData(address _addressOfToken)
+    public
+    view
+    returns (address, address, address, uint, uint, uint, uint, bool) {
         MultiLibrary.MultiChannelData memory channel = channels[_addressOfToken];
         return (channel.userAddress_,
         channel.signerAddress_,

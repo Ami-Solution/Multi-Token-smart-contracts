@@ -205,7 +205,11 @@ library MultiLibrary {
      * @param _addressOfSigner The addres of the signer.
      * @param _expiryNumberOfBlocks The timeout period for the given channel.
      */
-    function addChannel(MultiChannelData storage data, address _from, address _addressOfSigner, uint _expiryNumberOfBlocks)
+    function addChannel(
+        MultiChannelData storage data,
+        address _from,
+        address _addressOfSigner,
+        uint _expiryNumberOfBlocks)
     public {
         data.userAddress_ = _from;
         data.signerAddress_ = _addressOfSigner;
@@ -222,7 +226,13 @@ library MultiLibrary {
      * @param s Cryptographic param r derived from the signature.
      * @param v Cryptographic param s derived from the signature.
      */
-    function recoverAddressFromHashAndParameters(address _addressOfToken, uint _nonce, uint _amount, bytes32 r, bytes32 s, uint8 v)
+    function recoverAddressFromHashAndParameters(
+        address _addressOfToken,
+        uint _nonce,
+        uint _amount,
+        bytes32 r,
+        bytes32 s,
+        uint8 v)
     internal view
     returns(address) {
         bytes memory prefix = "\x19Ethereum Signed Message:\n32";
