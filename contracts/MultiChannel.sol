@@ -20,7 +20,7 @@ contract MultiChannel
 
     modifier channelDoesNotExist(address addressOfToken)
     {
-        require(channels[addressOfToken].timeout_ <= uint(0));
+        require(channels[addressOfToken].timeout_ == uint(0));
         _;
     }
 
