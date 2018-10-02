@@ -95,24 +95,6 @@ contract WETH {
         dst.transfer(wad);
         emit Transfer(src, dst, wad);
     }
-
-    function transferFrom(address src, address dst, uint wad)
-    public
-    returns(bool) {
-        require(balances[src] >= wad);
-
-        if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
-            require(allowance[src][msg.sender] >= wad);
-            allowance[src][msg.sender] -= wad;
-        }
-
-        balances[src] -= wad;
-        balances[dst] += wad;
-
-        emit Transfer(src, dst, wad);
-
-        return true;
-    }
 }
 
 
