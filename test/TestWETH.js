@@ -141,8 +141,145 @@ contract("Testing WETH", function () {
                 from: userAddress
             });
             assert.fail("User should not be able to convert with self-signed signature")
+        } catch (error) {
+            assertRevert(error);
         }
-        catch (error) {
+    });
+
+    it("Recipient should not be able to deposit with IOU nonce non zero", async () => {
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await web3.eth.sendTransaction({
+            from: userAddress,
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
+        });
+
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, 10, depositAmount, MultiChannel.options.address, signersPk);
+
+        try {
+            await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
+                from: recipientAddress
+            });
+            assert.fail("Recipient should not be able to deposit with IOU nonce which is nonzero ")
+        } catch (error) {
+            assertRevert(error);
+        }
+    });
+
+    it("Recipient should not be able to deposit with IOU amount non zero", async () => {
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await web3.eth.sendTransaction({
+            from: userAddress,
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
+        });
+
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, depositNonce, 15, MultiChannel.options.address, signersPk);
+
+        try {
+            await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
+                from: recipientAddress
+            });
+            assert.fail("Recipient should not be able to deposit with IOU amount which is nonzero ")
+        } catch (error) {
+            assertRevert(error);
+        }
+    });
+
+    it("Recipient should not be able to deposit with IOU amount and nonce non zero", async () => {
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await web3.eth.sendTransaction({
+            from: userAddress,
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
+        });
+
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, 15, 15, MultiChannel.options.address, signersPk);
+
+        try {
+            await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
+                from: recipientAddress
+            });
+            assert.fail("Recipient should not be able to deposit with IOU amount and nonce which is nonzero ")
+        } catch (error) {
+            assertRevert(error);
+        }
+    });
+
+    it("User should not be able to deposit with IOU nonce non zero", async () => {
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await web3.eth.sendTransaction({
+            from: userAddress,
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
+        });
+
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, 10, depositAmount, MultiChannel.options.address, recipientPk);
+
+        try {
+            await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
+                from: userAddress
+            });
+            assert.fail("User should not be able to deposit with IOU nonce which is nonzero ")
+        } catch (error) {
+            assertRevert(error);
+        }
+    });
+
+    it("User should not be able to deposit with IOU amount non zero", async () => {
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await web3.eth.sendTransaction({
+            from: userAddress,
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
+        });
+
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, depositNonce, 15, MultiChannel.options.address, recipientPk);
+
+        try {
+            await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
+                from: userAddress
+            });
+            assert.fail("User should not be able to deposit with IOU amount which is nonzero ")
+        } catch (error) {
+            assertRevert(error);
+        }
+    });
+
+    it("User should not be able to deposit with IOU amount and nonce non zero", async () => {
+        await MultiChannel.methods.addChannel(WETH.options.address, userAddress, signerAddress, timeout).send({
+            from: recipientAddress
+        });
+
+        await web3.eth.sendTransaction({
+            from: userAddress,
+            to: MultiChannel.options.address,
+            value: 1000000000000000000
+        });
+
+        const depositParams = closingHelper.getClosingParameters(WETH.options.address, 15, 15, MultiChannel.options.address, recipientPk);
+
+        try {
+            await MultiChannel.methods.deposit(WETH.options.address, depositNonce, depositAmount, depositParams.v, depositParams.r, depositParams.s, 20317).send({
+                from: userAddress
+            });
+            assert.fail("User should not be able to deposit with IOU amount and nonce which is nonzero ")
+        } catch (error) {
             assertRevert(error);
         }
     });
