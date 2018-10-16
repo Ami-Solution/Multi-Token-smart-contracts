@@ -23,13 +23,11 @@ contract WETH {
     string public symbol = "WETH";
     uint8 public decimals = 18;
 
-    event Approval(address indexed src, address indexed guy, uint wad);
     event Transfer(address indexed src, address indexed dst, uint wad);
     event Deposit(address indexed dst, uint wad);
     event Withdrawal(address indexed src, uint wad);
 
     mapping(address => uint) public balances;
-    mapping(address => mapping(address => uint)) public allowance;
 
     function () public payable {
         deposit();
@@ -62,16 +60,6 @@ contract WETH {
      */
     function totalSupply() public view returns(uint) {
         return address(this).balance;
-    }
-
-    /** @notice Allows msg.sender to increas allowance in WETH to send someone
-    * @param guy  - Destination address to increase approval to 
-    * @param wad - Amount to send to the destination
-     */
-    function approve(address guy, uint wad) public returns(bool) {
-        allowance[msg.sender][guy] = wad;
-        emit Approval(msg.sender, guy, wad);
-        return true;
     }
 
     /** @notice Automatically unwraps ETH, and sends ETH to destination address
