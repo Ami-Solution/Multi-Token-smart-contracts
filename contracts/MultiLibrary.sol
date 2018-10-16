@@ -18,16 +18,17 @@ library MultiLibrary {
      * @param closedNonce_ The nonce at hwich the channel was last closed; if never closed before, 0
      * @param shouldReturn_ Boolean value representing whether the tokens should be returned upon close
      */
+
     struct MultiChannelData {
         ERC20Token token_;
+        uint32 timeout_;
         address userAddress_;
+        uint32 closedBlock_;
         address signerAddress_;
-        address recipientAddress_;
-        uint timeout_;
-        uint amountOwed_;
-        uint closedBlock_;
-        uint closedNonce_;
         bool shouldReturn_;
+        address recipientAddress_;
+        uint amountOwed_;
+        uint closedNonce_;
     }
 
     event LogChannelSettled(uint blockNumber, uint finalBalance);
@@ -39,12 +40,12 @@ library MultiLibrary {
         _;
     }
     modifier inContestPeriod(MultiChannelData storage data) {
-        require(data.closedBlock_ + data.timeout_ >= block.number);
+        require(data.closedBlock_ + uint256(data.timeout_) >= block.number);
         _;
     }
 
     modifier timeoutOver(MultiChannelData storage data) {
-        require(data.closedBlock_ + data.timeout_ < block.number);
+        require(data.closedBlock_ + uint256(data.timeout_) < block.number);
         _;
     }
 
@@ -124,7 +125,7 @@ library MultiLibrary {
         require(data.closedNonce_ < _nonce);
         data.amountOwed_ = _amount;
         data.closedNonce_ = _nonce;
-        data.closedBlock_ = block.number;
+        data.closedBlock_ = uint32(block.number);
         data.shouldReturn_ = _returnToken;
     }
 
@@ -137,7 +138,7 @@ library MultiLibrary {
     channelIsOpen(data)
     callerIsChannelParticipant(data) {
         data.shouldReturn_ = true;
-        data.closedBlock_ = block.number;
+        data.closedBlock_ = uint32(block.number);
     }
 
     /**
@@ -210,7 +211,7 @@ library MultiLibrary {
         MultiChannelData storage data,
         address _from,
         address _addressOfSigner,
-        uint _expiryNumberOfBlocks)
+        uint32 _expiryNumberOfBlocks)
     public {
         data.userAddress_ = _from;
         data.signerAddress_ = _addressOfSigner;
