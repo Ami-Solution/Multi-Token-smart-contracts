@@ -89,6 +89,7 @@ library MultiLibrary {
     {
         address signerAddress = recoverAddressFromHashAndParameters(_addressOfWETH, _nonce, _amount, _r, _s, _v);
         require(signerAddress == data.signerAddress_);
+        require (_nonce == 0 && _amount == 0);
         require (_addressOfWETH.call.value(address(this).balance).gas(gasAmount)());
         emit Deposit(address(this).balance);
     }
