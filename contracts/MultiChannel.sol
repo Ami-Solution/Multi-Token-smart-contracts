@@ -45,7 +45,7 @@ contract MultiChannel
         address _from,
         address _addressOfSigner,
         address _addressOfToken,
-        uint _expiryNumberOfBlocks)
+        uint32 _expiryNumberOfBlocks)
     public
     {
         channels[_addressOfToken].token_ = ERC20Token(_addressOfToken);
@@ -140,7 +140,7 @@ contract MultiChannel
         address _addressOfToken,
         address _from,
         address _addressOfSigner,
-        uint _expiryNumberOfBlocks)
+        uint32 _expiryNumberOfBlocks)
     external
     channelDoesNotExist(_addressOfToken)
     {
@@ -187,7 +187,7 @@ contract MultiChannel
     function getChannelData(address _addressOfToken)
     public
     view
-    returns (address, address, address, uint, uint, uint, uint, bool) {
+    returns (address, address, address, uint32, uint, uint32, uint, bool) {
         MultiLibrary.MultiChannelData memory channel = channels[_addressOfToken];
         return (channel.userAddress_,
         channel.signerAddress_,
